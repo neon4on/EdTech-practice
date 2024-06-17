@@ -6,7 +6,7 @@ const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
 
-// Инициализация приложения
+// Инициализация приложения :3
 const app = express();
 
 // Настройка Handlebars
