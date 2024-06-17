@@ -1,0 +1,13 @@
+<h1>Учебные группы</h1>
+<ul>
+  {{#each groups}}
+    <li>
+      <a href='/groups/{{this.id}}'>{{this.name}}</a>
+      <a href='/groups/{{this.id}}/edit'>Редактировать</a>
+      <form action='/groups/{{this.id}}?_method=DELETE' method='POST' style='display:inline;'>
+        <button type='submit'>Удалить</button>
+      </form>
+    </li>
+  {{/each}}
+</ul>
+<a href='/groups/new'>Добавить новую группу</a>
