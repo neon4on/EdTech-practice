@@ -7,6 +7,8 @@ const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
 const authRoutes = require('./routes/auth');
 const groupRoutes = require('./routes/group');
+// const scheduleRoutes = require('./routes/schedule');
+// const studentRoutes = require('./routes/students');
 
 const app = express();
 
@@ -33,6 +35,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/auth', authRoutes);
 app.use('/groups', groupRoutes);
+// app.use('/schedule', scheduleRoutes);
+// app.use('/students', studentRoutes);
 
 app.get('/', (req, res) => {
   res.render('index', { title: 'Home' });

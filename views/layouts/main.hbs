@@ -6,6 +6,28 @@
     <link rel='stylesheet' href='/css/styles.css' />
   </head>
   <body>
-    {{{body}}}
+    <div class='container'>
+      <aside class='sidebar'>
+        <div class='logo'>
+          <h2>Лого</h2>
+        </div>
+        <nav class='menu'>
+          <ul>
+            <li><a href='/schedule'>Расписание</a></li>
+            <li><a href='/groups'>Группы</a></li>
+          </ul>
+        </nav>
+      </aside>
+      <div class='main-content'>
+        <header class='header'>
+          <div class='username'>
+            <span>Имя пользователя</span>
+          </div>
+        </header>
+        <main class='content'>
+          {{{body}}}
+        </main>
+      </div>
+    </div>
   </body>
 </html>
