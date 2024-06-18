@@ -58,7 +58,7 @@ app.listen(3000, () => console.log('Server is running on port 3000'));
 */
 
 // Импорт модуля для работы с базой данных
-const db = require('./db');
+const db = require('./config');
 
 // Получение списка всех учебных планов из базы данных
 async function getAllStudyPlans() {
