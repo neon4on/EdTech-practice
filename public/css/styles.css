@@ -17,15 +17,23 @@ body {
   position: fixed;
   top: 0;
   bottom: 0;
-  padding: 20px;
+  padding-left: 20px;
+  padding-top: 4px;
 }
 
 .logo {
   margin-bottom: 20px;
 }
 
-.logo h2 {
-  margin: 0;
+.logo img {
+  max-width: 100%;
+  height: auto;
+  width: 34px;
+  height: auto;
+}
+
+.logo span {
+  margin-left: 10px;
 }
 
 .menu ul {
