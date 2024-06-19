@@ -1,0 +1,12 @@
+<h1>Редактировать учебную группу</h1>
+<form action='/groups/{{group.id}}?_method=PUT' method='POST'>
+  <label for='name'>Название:</label>
+  <input type='text' id='name' name='name' value='{{group.name}}' required />
+  <label for='description'>Описание:</label>
+  <input type='text' id='description' name='description' value='{{group.description}}' />
+  <label for='direction'>Направление:</label>
+  <input type='text' id='direction' name='direction' value='{{group.direction}}' required />
+  <label for='course'>Курс:</label>
+  <input type='number' id='course' name='course' value='{{group.course}}' required />
+  <button type='submit'>Сохранить изменения</button>
+</form>

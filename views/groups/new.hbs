@@ -1,0 +1,12 @@
+<h1>Создать новую учебную группу</h1>
+<form action='/groups' method='POST'>
+  <label for='name'>Название:</label>
+  <input type='text' id='name' name='name' required />
+  <label for='description'>Описание:</label>
+  <input type='text' id='description' name='description' />
+  <label for='direction'>Направление:</label>
+  <input type='text' id='direction' name='direction' required />
+  <label for='course'>Курс:</label>
+  <input type='number' id='course' name='course' required />
+  <button type='submit'>Создать</button>
+</form>

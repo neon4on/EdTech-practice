@@ -1,89 +1,73 @@
-/*
--— код для создания таблицы study_plan —-
-
-CREATE TABLE study_plan (
-id SERIAL PRIMARY KEY,
-title VARCHAR(255),
-description TEXT,
-groupId INT
-);
-
-
-*/
-
 const express = require('express');
-const app = express();
-app.use(express.json());
+const sequelize = require('../config/database');
 
-let studyPlans = [];
+const router = express.Router();
 
-// Маршрут для получения учебных планов. Если указан id, возвращается конкретный учебный план.
-app.get('/study_plans/:id?', (req, res) => {
-if (req.params.id) {
-const plan = studyPlans.find(plan => plan.id === parseInt(req.params.id));
-res.send(plan);
-} else {
-res.send(studyPlans);
-}
+// Получить все учебные планы
+router.get('/', async (req, res) => {
+  const [results, metadata] = await sequelize.query('SELECT * FROM studyPlans');
+  res.render('study_plans', { title: 'Учебные планы', studyPlans: results });
 });
 
-// Маршрут для создания нового учебного плана
-app.post('/study_plans', (req, res) => {
-const newPlan = req.body;
-studyPlans.push(newPlan);
-res.send(newPlan);
+// Показать форму для создания нового учебного плана
+router.get('/new', (req, res) => {
+  res.render('study_plans/new', { title: 'Создать новый учебный план' });
 });
 
-// Маршрут для обновления существующего учебного плана
-app.put('/study_plans/:id', (req, res) => {
-const updatedPlan = req.body;
-studyPlans = studyPlans.map(plan => plan.id === parseInt(req.params.id) ? updatedPlan : plan);
-res.send(updatedPlan);
+// Показать детали учебного плана
+router.get('/study_plans/:id', async (req, res) => {
+  const [results, metadata] = await sequelize.query('SELECT * FROM studyplans WHERE id = ?', {
+    replacements: [req.params.id],
+  });
+  const studyPlan = results[0];
+  res.render('study_plans/show', { title: studyPlan.title, studyPlan });
 });
 
-// Маршрут для удаления учебного плана
-app.delete('/study_plans/:id', (req, res) => {
-studyPlans = studyPlans.filter(plan => plan.id !== parseInt(req.params.id));
-res.send({ message: 'Study plan deleted' });
+
+router.post('/new', async (req, res) => {
+  const { title, description, groupId } = req.body;
+  try {
+    await sequelize.query(
+      'INSERT INTO studyplans (title, description, groupid) VALUES (?, ?, ?)',
+      { replacements: [title, description, groupId] },
+    );
+    res.status(201).json({ message: 'Study plan created' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred' });
+  }
 });
 
-// Запуск сервера на порту 3000
-app.listen(3000, () => console.log('Server is running on port 3000'));
 
 
-/* 
+// Показать форму для редактирования учебного плана
+router.get('/edit/:id', async (req, res) => {
+  const [results, metadata] = await sequelize.query('SELECT * FROM studyplans WHERE id = ?', {
+    replacements: [req.params.id],
+  });
+  const studyPlan = results[0];
+  res.render('study_plans/edit', { title: 'Редактировать учебный план', studyPlan });
+});
 
------- ФУНКЦИИ ------- 
+// Обновить учебный план
+router.post('/edit/:id', async (req, res) => {
+  const { title, description, groupId } = req.body;
+  await sequelize.query(
+    'UPDATE studyplans SET title = ?, description = ?, groupid = ? WHERE id = ?',
+    { replacements: [title, description, groupId, req.params.id] },
+  );
+  res.redirect('/study_plans');
+});
 
-*/
+// Удалить учебный план
+router.get('/delete/:id', async (req, res) => {
+  await sequelize.query(
+    'DELETE FROM studyplans WHERE id = ?',
+    { replacements: [req.params.id] },
+  );
+  res.redirect('/study_plans');
+});
 
-// Импорт модуля для работы с базой данных
-const db = require('./config');
 
-// Получение списка всех учебных планов из базы данных
-async function getAllStudyPlans() {
-    const studyPlans = await db.query('SELECT * FROM StudyPlans');
-    return studyPlans;
-}
 
-// Создание нового учебного плана и сохранение его в базе данных
-async function createStudyPlan(plan) {
-    const result = await db.query('INSERT INTO StudyPlans SET ?', plan);
-    return result.insertId;
-}
-
-// Получение конкретного учебного плана по идентификатору
-async function getStudyPlanById(id) {
-    const plan = await db.query('SELECT * FROM StudyPlans WHERE id = ?', [id]);
-    return plan[0];
-}
-
-// Обновление существующего учебного плана
-async function updateStudyPlan(id, updatedPlan) {
-    await db.query('UPDATE StudyPlans SET ? WHERE id = ?', [updatedPlan, id]);
-}
-
-// Удаление учебного плана
-async function deleteStudyPlan(id) {
-    await db.query('DELETE FROM StudyPlans WHERE id = ?', [id]);
-}
+module.exports = router;
