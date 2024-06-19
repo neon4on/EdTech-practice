@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
-const authRoutes = require('./routes/auth');
+const authRouter = require('./routes/auth');
 const groupRoutes = require('./routes/group');
 
 const app = express();
@@ -31,7 +31,7 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/auth', authRoutes);
+app.use('/auth', authRouter); 
 app.use('/groups', groupRoutes);
 
 app.get('/', (req, res) => {

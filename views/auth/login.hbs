@@ -4,15 +4,43 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <title>{{title}}</title>
     <link rel='stylesheet' href='/css/styles.css' />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   </head>
   <body>
     <h1>Вход</h1>
-    <form action='/auth/login' method='POST'>
+    <form id='login-form' action='/auth/login' method='POST'>
       <label for='email'>Email:</label>
       <input type='email' id='email' name='email' required />
       <label for='password'>Пароль:</label>
       <input type='password' id='password' name='password' required />
       <button type='submit'>Войти</button>
     </form>
+
+    <script>
+      $(document).ready(function() {
+        $("#login-form").submit(function(e) {
+          e.preventDefault();
+          const form = $(this);
+          $.post(form.attr('action'), form.serialize()).done(function(response) {
+            if (response.message === 'Вход выполнен успешно') {
+              M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
+              setTimeout(function() {
+                window.location.href = '/';
+              }, 1500);
+            } else {
+              M.toast({html: response.message, classes: 'rounded red'});
+            }
+          }).fail(function(xhr) {
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+              M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
+            } else {
+              M.toast({html: 'Произошла ошибка при попытке входа', classes: 'rounded red'});
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>
