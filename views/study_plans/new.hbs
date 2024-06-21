@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Создать учебный план</title>
+</head>
+<body>
+    <h1>Создать новый учебный план</h1>
+    <form action="/study_plans/new" method="post">
+        <label for="title">Название:</label><br>
+        <input type="text" id="title" name="title"><br>
+        <label for="description">Описание:</label><br>
+        <textarea id="description" name="description"></textarea><br>
+        <label for="groupId">ID группы:</label><br>
+        <input type="text" id="groupId" name="groupId"><br>
+        <input type="submit" value="Создать">
+    </form>
+    <button onclick="location.href='/study_plans'">Вернуться назад</button>
+</body>
+</html>

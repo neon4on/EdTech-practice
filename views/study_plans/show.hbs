@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Учебный план {{studyPlan.title}}</title>
+</head>
+<body>
+    <h1>{{studyPlan.title}}</h1>
+    <p>{{studyPlan.description}}</p>
+    <p>ID группы: {{studyPlan.groupId}}</p>
+    <a href="/study_plans/{{studyPlan.id}}/edit">Редактировать</a>
+    <form action="/study_plans/{{studyPlan.id}}" method="post">
+        <input type="hidden" name="_method" value="delete">
+        <input type="submit" value="Удалить">
+    </form>
+</body>
+</html>

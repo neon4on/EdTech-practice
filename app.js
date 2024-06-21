@@ -7,15 +7,12 @@ const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
 const authRoutes = require('./routes/auth');
 const groupRoutes = require('./routes/group');
-// const scheduleRoutes = require('./routes/schedule');
+const studyplanRoutes = require('./routes/study_plan');
+
 
 const app = express();
 
-// Настройка Handlebars
-const hbs = exphbs.create({
-  extname: '.hbs',
-  partialsDir: path.join(__dirname, 'views', 'partials'),
-});
+const hbs = exphbs.create({ extname: '.hbs' });
 
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
@@ -37,12 +34,17 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+//авторизация и регистрация Сони и Фаниса
 app.use('/auth', authRoutes);
 app.use('/groups', groupRoutes);
-// app.use('/schedule', scheduleRoutes);
+
+// учебный план Наиль
+app.use('/study_plans', studyplanRoutes);
 
 app.get('/', (req, res) => {
   res.render('index', { title: 'Home' });
+
 });
 
 const PORT = process.env.PORT || 3000;
@@ -51,3 +53,12 @@ sequelize.sync().then(() => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
 });
+
+
+
+
+// ...
+
+
+
+// ...
