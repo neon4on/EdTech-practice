@@ -4,9 +4,7 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <title>{{title}}</title>
     <link rel='stylesheet' href='/css/styles.css' />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   </head>
   <body>
     <h1>Регистрация</h1>
@@ -30,9 +28,6 @@
 
     <script>
       $(document).ready(function() {
-        // Инициализация select элемента Materialize
-        $('select').formSelect();
-
         // Ограничение ввода в поля имени и фамилии
         $("#firstName, #lastName").on('input', function() {
           this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '');
@@ -43,20 +38,20 @@
           const form = $(this);
           $.post(form.attr('action'), form.serialize()).done(function(response) {
             if (response.message === 'Пользователь с таким email уже существует') {
-              M.toast({html: response.message, classes: 'rounded red'});
+              alert(response.message);
             } else if (response.message === 'Регистрация прошла успешно') {
-              M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
+              alert(response.message);
               setTimeout(function() {
                 window.location.href = '/auth/login';
               }, 1500);
             } else {
-              M.toast({html: response.message, classes: 'rounded red'});
+              alert(response.message);
             }
           }).fail(function(xhr) {
             if (xhr.responseJSON && xhr.responseJSON.message) {
-              M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
+              alert(xhr.responseJSON.message);
             } else {
-              M.toast({html: 'Произошла ошибка при попытке регистрации', classes: 'rounded red'});
+              alert('Произошла ошибка при попытке регистрации');
             }
           });
         });
