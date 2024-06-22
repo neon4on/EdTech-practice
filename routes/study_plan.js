@@ -9,8 +9,13 @@ const router = express.Router();
 
 // Получить все учебные планы
 router.get('/', async (req, res) => {
-  const [results, metadata] = await sequelize.query('SELECT * FROM studyPlans');
-  res.render('study_plans', { title: 'Учебные планы', studyPlans: results });
+  try {
+    const [results] = await sequelize.query('SELECT * FROM studyPlans');
+    res.render('study_plans', { title: 'Учебные планы', studyPlans: results });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred' });
+  }
 });
 
 // Показать форму для создания нового учебного плана
@@ -18,36 +23,52 @@ router.get('/new', (req, res) => {
   res.render('study_plans/new', { title: 'Создать новый учебный план' });
 });
 
-
 // Показать детали учебного плана
 router.get('/:id', async (req, res) => {
-  const [results, metadata] = await sequelize.query('SELECT * FROM studyplans WHERE id = ?', {
-    replacements: [req.params.id],
-  });
-  const studyPlan = results[0];
+  try {
+    const [results] = await sequelize.query('SELECT * FROM studyplans WHERE id = ?', {
+      replacements: [req.params.id],
+    });
+    const studyPlan = results[0];
 
-  // Получить данные файла Excel
-  const [fileResults, fileMetadata] = await sequelize.query('SELECT file_data FROM files WHERE id = ?', {
-    replacements: [studyPlan.file_id],
-  });
+    // Получить данные файла Excel
+    const [fileResults] = await sequelize.query('SELECT file_data FROM files WHERE id = ?', {
+      replacements: [studyPlan.file_id],
+    });
 
-  // Проверка наличия файла
-  if (!fileResults || fileResults.length === 0) {
-    console.error('No file found');
-    return res.status(400).json({ message: 'No file found' });
+    if (!fileResults || fileResults.length === 0) {
+      console.error('No file found');
+      return res.status(400).json({ message: 'No file found' });
+    }
+
+    const fileData = fileResults[0].file_data;
+
+    // Преобразование данных файла в буфер
+    const fileBuffer = Buffer.from(fileData, 'binary');
+
+    // Чтение данных Excel
+    const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const excelData = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
+    // Извлечение заголовков классов и данных
+    const headerRow1 = excelData[0];
+    const headerRow2 = excelData[1];
+    const classes = headerRow2.slice(1);
+    const formattedData = [];
+    for (let i = 2; i < excelData.length; i++) {
+      const row = excelData[i];
+      const subject = row[0];
+      const hours = row.slice(1);
+      const rowData = { subject, hours };
+      formattedData.push(rowData);
+    }
+
+    res.render('study_plans/show', { title: studyPlan.title, studyPlan, classes, formattedData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred' });
   }
-
-  const fileData = fileResults[0].file_data;
-
-  // Преобразование данных файла в буфер
-  const fileBuffer = Buffer.from(fileData, 'binary');
-
-  // Чтение данных Excel
-  const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
-  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  const excelData = xlsx.utils.sheet_to_json(worksheet);
-
-  res.render('study_plans/show', { title: studyPlan.title, studyPlan, excelData });
 });
 
 // Создать новый учебный план с файлом
@@ -55,13 +76,11 @@ router.post('/new', upload.single('file'), async (req, res) => {
   const { title, description, groupId } = req.body;
   const file = req.file;
 
-  // Проверка наличия файла
   if (!file) {
     console.error('No file attached');
     return res.status(400).json({ message: 'No file attached' });
   }
 
-  // Проверка существования файла
   if (!fs.existsSync(file.path)) {
     console.error('File does not exist');
     return res.status(400).json({ message: 'File does not exist' });
@@ -70,16 +89,14 @@ router.post('/new', upload.single('file'), async (req, res) => {
   const fileBuffer = fs.readFileSync(file.path);
 
   try {
-    // Добавление файла в таблицу files
     const [fileResults] = await sequelize.query(
       'INSERT INTO files (file_data) VALUES (?) RETURNING id',
-      { replacements: [fileBuffer] },
+      {
+        replacements: [fileBuffer],
+      },
     );
     const fileId = fileResults[0].id;
 
-
-    
-    // Добавление учебного плана в таблицу studyplans
     const [studyPlanResults] = await sequelize.query(
       'INSERT INTO studyplans (title, description, groupid, file_id) VALUES (?, ?, ?, ?) RETURNING id',
       { replacements: [title, description, groupId, fileId] },
@@ -94,11 +111,16 @@ router.post('/new', upload.single('file'), async (req, res) => {
 
 // Показать форму для редактирования учебного плана
 router.get('/edit/:id', async (req, res) => {
-  const [results, metadata] = await sequelize.query('SELECT * FROM studyplans WHERE id = ?', {
-    replacements: [req.params.id],
-  });
-  const studyPlan = results[0];
-  res.render('study_plans/edit', { title: 'Редактировать учебный план', studyPlan });
+  try {
+    const [results] = await sequelize.query('SELECT * FROM studyplans WHERE id = ?', {
+      replacements: [req.params.id],
+    });
+    const studyPlan = results[0];
+    res.render('study_plans/edit', { title: 'Редактировать учебный план', studyPlan });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred' });
+  }
 });
 
 // Обновить учебный план и заменить файл при наличии
@@ -107,16 +129,15 @@ router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
   const file = req.file;
 
   try {
-    // Получить текущий file_id учебного плана
     const [currentFileResults] = await sequelize.query(
       'SELECT file_id FROM studyplans WHERE id = ?',
-      { replacements: [req.params.id] },
+      {
+        replacements: [req.params.id],
+      },
     );
     const currentFileId = currentFileResults[0].file_id;
 
-    // Если предоставлен новый файл, обновить файл
     if (file) {
-      // Проверка существования файла
       if (!fs.existsSync(file.path)) {
         console.error('File does not exist');
         return res.status(400).json({ message: 'File does not exist' });
@@ -124,29 +145,23 @@ router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
 
       const fileBuffer = fs.readFileSync(file.path);
 
-      // Добавление нового файла в таблицу files
       const [fileResults] = await sequelize.query(
         'INSERT INTO files (file_data) VALUES (?) RETURNING id',
-        { replacements: [fileBuffer] },
+        {
+          replacements: [fileBuffer],
+        },
       );
       const fileId = fileResults[0].id;
 
-      // Обновление file_id учебного плана
-      await sequelize.query(
-        'UPDATE studyplans SET file_id = ? WHERE id = ?',
-        { replacements: [fileId, req.params.id] },
-      );
+      await sequelize.query('UPDATE studyplans SET file_id = ? WHERE id = ?', {
+        replacements: [fileId, req.params.id],
+      });
 
-      // Удаление старого файла из таблицы files
       if (currentFileId) {
-        await sequelize.query(
-          'DELETE FROM files WHERE id = ?',
-          { replacements: [currentFileId] },
-        );
+        await sequelize.query('DELETE FROM files WHERE id = ?', { replacements: [currentFileId] });
       }
     }
 
-    // Обновление информации учебного плана
     await sequelize.query(
       'UPDATE studyplans SET title = ?, description = ?, groupid = ? WHERE id = ?',
       { replacements: [title, description, groupId, req.params.id] },
@@ -159,30 +174,21 @@ router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
   }
 });
 
-
-
 // Удалить учебный план
 router.get('/delete/:id', async (req, res) => {
   try {
-    // Получить file_id учебного плана
     const [currentFileResults] = await sequelize.query(
       'SELECT file_id FROM studyplans WHERE id = ?',
-      { replacements: [req.params.id] },
+      {
+        replacements: [req.params.id],
+      },
     );
     const currentFileId = currentFileResults[0].file_id;
 
-    // Удалить учебный план
-    await sequelize.query(
-      'DELETE FROM studyplans WHERE id = ?',
-      { replacements: [req.params.id] },
-    );
+    await sequelize.query('DELETE FROM studyplans WHERE id = ?', { replacements: [req.params.id] });
 
-    // Если у учебного плана был файл, удалить его
     if (currentFileId) {
-      await sequelize.query(
-        'DELETE FROM files WHERE id = ?',
-        { replacements: [currentFileId] },
-      );
+      await sequelize.query('DELETE FROM files WHERE id = ?', { replacements: [currentFileId] });
     }
 
     res.redirect('/study_plans');
@@ -192,43 +198,4 @@ router.get('/delete/:id', async (req, res) => {
   }
 });
 
-
-
-
-
-
 module.exports = router;
-
-
-
-
-
-/* далее пойдет код который под сомнением 
-
- //ОТОБРАЖЕНИЕ ЭКСЕЛЬ 
-// Получить Excel файл для учебного плана
-router.get('/study_plans/:id/excel', async (req, res) => {
-  try {
-    // Получить file_id учебного плана
-    const [currentFileResults] = await sequelize.query(
-      'SELECT file_id FROM studyplans WHERE id = ?',
-      { replacements: [req.params.id] },
-    );
-    const fileId = currentFileResults[0].file_id;
-
-    // Получить данные файла из таблицы files
-    const [fileResults] = await sequelize.query(
-      'SELECT file_data FROM files WHERE id = ?',
-      { replacements: [fileId] },
-    );
-    const fileData = fileResults[0].file_data;
-
-    // Отправить данные файла как Buffer
-    res.send(Buffer.from(fileData));
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'An error occurred' });
-  }
-});
-
-*/

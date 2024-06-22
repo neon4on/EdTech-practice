@@ -1,28 +1,42 @@
-<!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>{{studyPlan.title}}</title>
     <style>
-        .excelData {
-            border: 1px solid black;
-            padding: 10px;
-            margin-top: 20px;
-        }
+      .excelData { margin-top: 20px; border-collapse: collapse; width: 100%; } .excelData th,
+      .excelData td { border: 1px solid black; padding: 8px; text-align: center; } .subject-name {
+      text-align: left; }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>{{studyPlan.title}}</h1>
     <p>Описание: {{studyPlan.description}}</p>
     <p>ID группы: {{studyPlan.groupid}}</p>
     <button onclick="location.href='/study_plans';">Вернуться к списку учебных планов</button>
 
-    <div class="excelData">
-        <h2>Данные из Excel:</h2>
-        {{#each excelData}}
-            <p>Предметная область: {{this.subjectArea}}</p>
-            <p>Учебный предмет: {{this.subject}}</p>
-            <p>Разделение учеников на группы: {{this.studentGroups}}</p>
-        {{/each}}
+    <div class='excelData'>
+      <h2>Данные из Excel:</h2>
+      <table class='excelData'>
+        <thead>
+          <tr>
+            <th rowspan='2'>Название предмета</th>
+          </tr>
+          <tr>
+            {{#each classes}}
+              <th>{{this}}</th>
+            {{/each}}
+          </tr>
+        </thead>
+        <tbody>
+          {{#each formattedData}}
+            <tr>
+              <td class='subject-name'>{{this.subject}}</td>
+              {{#each this.hours}}
+                <td>{{this}}</td>
+              {{/each}}
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
     </div>
-</body>
+  </body>
 </html>
