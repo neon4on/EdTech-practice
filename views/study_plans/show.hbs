@@ -1,16 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Учебный план {{studyPlan.title}}</title>
+    <title>{{studyPlan.title}}</title>
+    <style>
+        .excelData {
+            border: 1px solid black;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>{{studyPlan.title}}</h1>
-    <p>{{studyPlan.description}}</p>
-    <p>ID группы: {{studyPlan.groupId}}</p>
-    <a href="/study_plans/{{studyPlan.id}}/edit">Редактировать</a>
-    <form action="/study_plans/{{studyPlan.id}}" method="post">
-        <input type="hidden" name="_method" value="delete">
-        <input type="submit" value="Удалить">
-    </form>
+    <p>Описание: {{studyPlan.description}}</p>
+    <p>ID группы: {{studyPlan.groupid}}</p>
+    <button onclick="location.href='/study_plans';">Вернуться к списку учебных планов</button>
+
+    <div class="excelData">
+        <h2>Данные из Excel:</h2>
+        {{#each excelData}}
+            <p>Предметная область: {{this.subjectArea}}</p>
+            <p>Учебный предмет: {{this.subject}}</p>
+            <p>Разделение учеников на группы: {{this.studentGroups}}</p>
+        {{/each}}
+    </div>
 </body>
 </html>

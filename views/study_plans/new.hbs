@@ -5,13 +5,15 @@
 </head>
 <body>
     <h1>Создать новый учебный план</h1>
-    <form action="/study_plans/new" method="post">
+    <form action="/study_plans/new" method="post" enctype="multipart/form-data">
         <label for="title">Название:</label><br>
         <input type="text" id="title" name="title"><br>
         <label for="description">Описание:</label><br>
         <textarea id="description" name="description"></textarea><br>
         <label for="groupId">ID группы:</label><br>
         <input type="text" id="groupId" name="groupId"><br>
+        <label for="file">Файл:</label><br>
+        <input type="file" id="file" name="file"><br>
         <input type="submit" value="Создать">
     </form>
     <button onclick="location.href='/study_plans'">Вернуться назад</button>

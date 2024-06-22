@@ -1,3 +1,26 @@
+{{!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Редактирование учебного плана</title>
+</head>
+<body>
+    <h1>Редактировать</h1>
+    <form action="/study_plans/edit/{{studyPlan.id}}" method="post" enctype="multipart/form-data">
+        <label for="title">Название:</label><br>
+        <input type="text" id="title" name="title" value="{{studyPlan.title}}"><br>
+        <label for="description">Описание:</label><br>
+        <textarea id="description" name="description">{{studyPlan.description}}</textarea><br>
+        <label for="groupId">ID группы:</label><br>
+        <input type="text" id="groupId" name="groupId" value="{{studyPlan.groupid}}"><br>
+        <label for="file">Файл:</label><br>
+        <input type="file" id="file" name="file"><br>
+        <input type="submit" value="Сохранить">
+    </form>
+     <button onclick="location.href='/study_plans'">Вернуться назад</button>
+</body>
+</html> --}}
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,13 +28,16 @@
 </head>
 <body>
     <h1>Редактировать</h1>
-    <form action="/study_plans/edit/{{studyPlan.id}}" method="post">
+    <form action="/study_plans/edit/{{studyPlan.id}}" method="post" enctype="multipart/form-data">
         <label for="title">Название:</label><br>
         <input type="text" id="title" name="title" value="{{studyPlan.title}}"><br>
         <label for="description">Описание:</label><br>
         <textarea id="description" name="description">{{studyPlan.description}}</textarea><br>
         <label for="groupId">ID группы:</label><br>
         <input type="text" id="groupId" name="groupId" value="{{studyPlan.groupid}}"><br>
+        <label for="file">Текущий файл: {{studyPlan.file_id}}</label><br>
+        <label for="newFile">Заменить файл:</label><br>
+        <input type="file" id="newFile" name="newFile"><br>
         <input type="submit" value="Сохранить">
     </form>
      <button onclick="location.href='/study_plans'">Вернуться назад</button>
