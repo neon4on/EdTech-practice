@@ -2,9 +2,19 @@
   <head>
     <title>{{studyPlan.title}}</title>
     <style>
-      .excelData { margin-top: 20px; border-collapse: collapse; width: 100%; } .excelData th,
-      .excelData td { border: 1px solid black; padding: 8px; text-align: center; } .subject-name {
-      text-align: left; }
+      .excelData {
+        margin-top: 20px;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .excelData th, .excelData td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+      }
+      .subject-name {
+        text-align: left;
+      }
     </style>
   </head>
   <body>
@@ -19,6 +29,7 @@
         <thead>
           <tr>
             <th rowspan='2'>Название предмета</th>
+            <th colspan='{{classesLength}}'>Количество часов в неделю для:</th>
           </tr>
           <tr>
             {{#each classes}}

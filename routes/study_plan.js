@@ -55,6 +55,7 @@ router.get('/:id', async (req, res) => {
     const headerRow1 = excelData[0];
     const headerRow2 = excelData[1];
     const classes = headerRow2.slice(1);
+    
     const formattedData = [];
     for (let i = 2; i < excelData.length; i++) {
       const row = excelData[i];
@@ -124,11 +125,14 @@ router.get('/edit/:id', async (req, res) => {
 });
 
 // Обновить учебный план и заменить файл при наличии
+
+
 router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
   const { title, description, groupId } = req.body;
   const file = req.file;
 
   try {
+    // Получаем текущий файл, связанный с учебным планом
     const [currentFileResults] = await sequelize.query(
       'SELECT file_id FROM studyplans WHERE id = ?',
       {
@@ -137,6 +141,7 @@ router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
     );
     const currentFileId = currentFileResults[0].file_id;
 
+    // Если загружен новый файл, обновляем его в базе данных
     if (file) {
       if (!fs.existsSync(file.path)) {
         console.error('File does not exist');
@@ -153,45 +158,55 @@ router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
       );
       const fileId = fileResults[0].id;
 
+      // Обновляем file_id у учебного плана
       await sequelize.query('UPDATE studyplans SET file_id = ? WHERE id = ?', {
         replacements: [fileId, req.params.id],
       });
 
+      // Удаляем старый файл из базы данных
       if (currentFileId) {
         await sequelize.query('DELETE FROM files WHERE id = ?', { replacements: [currentFileId] });
       }
     }
 
+    // Обновляем остальные поля учебного плана
     await sequelize.query(
       'UPDATE studyplans SET title = ?, description = ?, groupid = ? WHERE id = ?',
       { replacements: [title, description, groupId, req.params.id] },
     );
 
-    res.redirect('/study_plans');
+    // Успешное завершение операции
+    res.status(200).json({ message: 'Study plan updated' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'An error occurred' });
   }
 });
 
+
 // Удалить учебный план
+
 router.get('/delete/:id', async (req, res) => {
   try {
+    // Получаем текущий файл, связанный с учебным планом
     const [currentFileResults] = await sequelize.query(
       'SELECT file_id FROM studyplans WHERE id = ?',
       {
         replacements: [req.params.id],
       },
     );
-    const currentFileId = currentFileResults[0].file_id;
+    const currentFileId = currentFileResults[0]?.file_id;
 
+    // Удаляем учебный план из базы данных
     await sequelize.query('DELETE FROM studyplans WHERE id = ?', { replacements: [req.params.id] });
 
+    // Удаляем связанный файл из базы данных, если он существует
     if (currentFileId) {
       await sequelize.query('DELETE FROM files WHERE id = ?', { replacements: [currentFileId] });
     }
 
-    res.redirect('/study_plans');
+    // Отправляем JSON-ответ о успешном удалении
+    res.status(200).json({ message: 'Study plan deleted' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'An error occurred' });

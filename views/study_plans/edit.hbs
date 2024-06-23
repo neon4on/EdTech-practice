@@ -1,43 +1,72 @@
-{{!-- {{!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Редактирование учебного плана</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
-    <h1>Редактировать</h1>
-    <form action="/study_plans/edit/{{studyPlan.id}}" method="post" enctype="multipart/form-data">
-        <label for="title">Название:</label><br>
-        <input type="text" id="title" name="title" value="{{studyPlan.title}}"><br>
-        <label for="description">Описание:</label><br>
-        <textarea id="description" name="description">{{studyPlan.description}}</textarea><br>
-        <label for="groupId">ID группы:</label><br>
-        <input type="text" id="groupId" name="groupId" value="{{studyPlan.groupid}}"><br>
-        <label for="file">Файл:</label><br>
-        <input type="file" id="file" name="file"><br>
-        <input type="submit" value="Сохранить">
-    </form>
-     <button onclick="location.href='/study_plans'">Вернуться назад</button>
-</body>
-</html> --}}
+  <h1>Редактировать</h1>
+    <div class="container">
+        
+        <form id="editStudyPlanForm" action="/study_plans/edit/{{studyPlan.id}}" method="post" enctype="multipart/form-data">
+            <div class="input-field">
+                <input type="text" id="title" name="title" value="{{studyPlan.title}}" required>
+                <label for="title">Название</label>
+            </div>
+            <div class="input-field">
+                <textarea id="description" name="description" class="materialize-textarea">{{studyPlan.description}}</textarea>
+                <label for="description">Описание</label>
+            </div>
+            <div class="input-field">
+                <input type="text" id="groupId" name="groupId" value="{{studyPlan.groupid}}" required>
+                <label for="groupId">ID группы</label>
+            </div>
+            <div class="file-field input-field">
+                <div class="btn">
+                    <span>Заменить файл</span>
+                    <input type="file" id="newFile" name="newFile">
+                </div>
+                <div class="file-path-wrapper">
+                    <input class="file-path validate" type="text" placeholder="Выберите файл">
+                </div>
+            </div>
+            <input type="submit" value="Сохранить" class="btn">
+            <button onclick="location.href='/study_plans'" class="btn">Вернуться назад</button>
+        </form>
+       
+    </div>
+     
 
-<html>
-  <head>
-    <title>Редактирование учебного плана</title>
-  </head>
-  <body>
-    <h1>Редактировать</h1>
-    <form action='/study_plans/edit/{{studyPlan.id}}' method='post' enctype='multipart/form-data'>
-      <label for='title'>Название:</label><br />
-      <input type='text' id='title' name='title' value='{{studyPlan.title}}' /><br />
-      <label for='description'>Описание:</label><br />
-      <textarea id='description' name='description'>{{studyPlan.description}}</textarea><br />
-      <label for='groupId'>ID группы:</label><br />
-      <input type='text' id='groupId' name='groupId' value='{{studyPlan.groupid}}' /><br />
-      <label for='file'>Текущий файл: {{studyPlan.file_id}}</label><br />
-      <label for='newFile'>Заменить файл:</label><br />
-      <input type='file' id='newFile' name='newFile' /><br />
-      <input type='submit' value='Сохранить' />
-    </form>
-    <button onclick="location.href='/study_plans'">Вернуться назад</button>
-  </body>
+    <script>
+        $(document).ready(function(){
+            M.updateTextFields(); // Update text fields for Materialize
+
+            // Handle form submission using AJAX
+            $('#editStudyPlanForm').submit(function(e){
+                e.preventDefault();
+                var formData = new FormData($(this)[0]);
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(data){
+                        M.toast({html: 'Учебный план успешно обновлен', classes: 'rounded'});
+                        setTimeout(function(){
+                            window.location.href = '/study_plans';
+                        }, 3000); // Redirect after 3 seconds
+                    },
+                    error: function(jqXHR){
+                        var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при обновлении учебного плана';
+                        M.toast({html: message, classes: 'rounded red lighten-1'});
+                    }
+                });
+            });
+        });
+    </script>
+</body>
 </html>
