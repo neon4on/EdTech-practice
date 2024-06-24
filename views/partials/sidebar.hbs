@@ -1,12 +1,67 @@
-<aside class='sidebar'>
-  <div class='logo'>
-    <img src='/images/logo.svg' alt='Лого' />
-    <span>ООО "Платоникс"</span>
-  </div>
-  <nav class='menu'>
-    <ul>
-      <li><a href='/schedule'>Расписание</a></li>
-      <li><a href='/groups'>Группы</a></li>
-    </ul>
-  </nav>
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <img src="/images/logo.svg" alt="Иконка компании">
+        <span>ООО "Онлайн Платоникс"</span>
+        <button class="close-sidebar-button" onclick="closeSidebar()">✖</button>
+    </div>
+    <nav class="menu">
+        <ul>
+            <li><a href="/schedule">Расписание</a></li>
+            <li><a href="/groups">Группы</a></li>
+        </ul>
+    </nav>
 </aside>
+
+<style>
+    .sidebar {
+        width: 250px;
+        background-color: #343a40;
+        color: #fff;
+        position: fixed;
+        left: -250px;
+        top: 0;
+        height: 100%;
+        transition: left 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .sidebar.visible {
+        left: 0;
+    }
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        background-color: #23272b;
+        border-bottom: 1px solid #444;
+    }
+    .sidebar-header img {
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+    }
+    .close-sidebar-button {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    .menu {
+        padding: 20px;
+    }
+    .menu ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .menu ul li {
+        margin-bottom: 10px;
+    }
+    .menu ul li a {
+        color: #fff;
+        text-decoration: none;
+    }
+</style>

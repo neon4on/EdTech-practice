@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
-    <h1>Создать новый учебный план</h1>
+    <h1 class="center-align">Создать новый учебный план</h1>
     <form id="studyPlanForm" enctype="multipart/form-data">
         <label for="title">Название:</label><br>
         <input type="text" id="title" name="title" required><br>
@@ -15,11 +15,17 @@
         <textarea id="description" name="description" required></textarea><br>
         <label for="groupId">ID группы:</label><br>
         <input type="text" id="groupId" name="groupId" required><br>
+        
         <label for="file">Файл:</label><br>
+        <div class="btn waves-effect waves-light">
         <input type="file" id="file" name="file" required><br>
+        </div>
+
         <button type="submit" id="btnNewStPlan" class="btn">Создать</button>
-    </form>
-    <button onclick="location.href='/study_plans'">Вернуться назад</button>
+    
+  </form>
+    <button onclick="window.location.href='/study_plans'" class="waves-effect waves-light btn">Вернуться назад</button>
+
 
     <script>
         $("#btnNewStPlan").click(function(e) {
