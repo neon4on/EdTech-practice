@@ -5,8 +5,8 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
-const authRoutes = require('./routes/auth');
-const groupRoutes = require('./routes/group');
+const authRouter = require('./routes/auth');
+const groupRouter = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
 
 
@@ -35,10 +35,8 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-//авторизация и регистрация Сони и Фаниса
-app.use('/auth', authRoutes);
-app.use('/groups', groupRoutes);
+app.use('/auth', authRouter); 
+app.use('/groups', groupRouter);
 
 // учебный план Наиль
 app.use('/study_plans', studyplanRoutes);
@@ -54,12 +52,3 @@ sequelize.sync().then(() => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
 });
-
-
-
-
-// ...
-
-
-
-// ...
