@@ -1,11 +1,20 @@
-<html lang='en'>
-  <head>
-    <meta charset='UTF-8' />
-    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
-    <link rel='stylesheet' href='/css/styles.css' />
-  </head>
-  <body>
-    {{{body}}}
-  </body>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        {{> sidebar}}
+        <div class="main-content">
+            {{> header}}
+            <main class="content">
+                {{{body}}}
+            </main>
+        </div>
+    </div>
+</body>
 </html>

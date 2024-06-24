@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Редактирование учебного плана</title>
+</head>
+<body>
+    <h1>Редактировать</h1>
+    <form action="/study_plans/edit/{{studyPlan.id}}" method="post">
+        <label for="title">Название:</label><br>
+        <input type="text" id="title" name="title" value="{{studyPlan.title}}"><br>
+        <label for="description">Описание:</label><br>
+        <textarea id="description" name="description">{{studyPlan.description}}</textarea><br>
+        <label for="groupId">ID группы:</label><br>
+        <input type="text" id="groupId" name="groupId" value="{{studyPlan.groupid}}"><br>
+        <input type="submit" value="Сохранить">
+    </form>
+     <button onclick="location.href='/study_plans'">Вернуться назад</button>
+</body>
+</html>

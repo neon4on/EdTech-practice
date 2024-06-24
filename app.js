@@ -1,23 +1,27 @@
 const express = require('express');
-const { engine } = require('express-handlebars');
+const exphbs = require('express-handlebars');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
+const authRoutes = require('./routes/auth');
+const groupRoutes = require('./routes/group');
+const studyplanRoutes = require('./routes/study_plan');
 
-// Инициализация приложения :3
+
+// Инициализация приложения
 const app = express();
 
-// Настройка Handlebars
-app.engine('hbs', engine({ extname: '.hbs' }));
-app.set('view engine', 'hbs');
+const hbs = exphbs.create({ extname: '.hbs' });
 
-// Парсинг тела запроса
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Настройка сессий
 app.use(
   session({
     secret: 'supersecretkey',
@@ -29,17 +33,33 @@ app.use(
   }),
 );
 
-// Статические файлы
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Маршруты
-app.use('/', require('./routes/index'));
 
-// Запуск сервера
-const PORT = process.env.PORT || 3000;
-// sequelize.sync().then(() => {
+//авторизация и регистрация Сони и Фаниса
+app.use('/auth', authRoutes);
+app.use('/groups', groupRoutes);
 
-// });
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// учебный план Наиль
+app.use('/study_plans', studyplanRoutes);
+
+app.get('/', (req, res) => {
+  res.render('index', { title: 'Home' });
+
 });
+
+const PORT = process.env.PORT || 3000;
+sequelize.sync().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+});
+
+
+
+
+// ...
+
+
+
+// ...

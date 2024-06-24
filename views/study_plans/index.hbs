@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+</head>
+<body>
+    <h1>{{title}}</h1>
+     <a href="/study_plans/new">Создать новый учебный план</a>
+    <table>
+        <tr>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>ID группы</th>
+            <th>Действия</th>
+        </tr>
+        {{#each studyPlans}}
+            <tr>
+                <td>{{this.title}}</td>
+                <td>{{this.description}}</td>
+                <td>{{this.groupid}}</td>
+                <td>
+                    <a href="/study_plans/edit/{{this.id}}">Редактировать</a>
+                    <a href="/study_plans/delete/{{this.id}}">Удалить</a>
+                </td>
+            </tr>
+        {{/each}}
+    </table>
+   
+</body>
+</html>
