@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шапка</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            transition: margin-left 0.3s ease;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        .header-left img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        .header-right span {
+            margin-right: 20px;
+        }
+        .header-right button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .header-right button:hover {
+            background-color: #0056b3;
+        }
+        .toggle-sidebar-button {
+            margin-right: 20px;
+        }
+        .header.sidebar-open {
+            margin-left: 250px; /* Ширина сайдбара */
+        }
+    </style>
+</head>
+<body>
+    <div class="header" id="header">
+        <div class="header-left">
+            <button class="toggle-sidebar-button" onclick="toggleSidebar()">☰</button>
+            <img src="/images/logo.svg" alt="Иконка компании">
+            <span>ООО "Онлайн Платоникс"</span>
+        </div>
+        <div class="header-right">
+            <span>Имя пользователя</span>
+            <button onclick="logout()">Выйти</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+        }
+
+        function logout() {
+            // Логика выхода
+            alert("Выход из системы");
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body>
+   <h1 class="center-align">Учебные планы</h1>
+
+
+    <div class="container">
+  
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="4">
+                    </th>
+                </tr>
+                <tr>
+                    <th><button onclick="window.location.href='/study_plans/new'" class="waves-effect waves-light btn">Создать </button></th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>ID группы</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each studyPlans}}
+                    <tr id="plan-{{this.id}}">
+                        <td><a href="/study_plans/{{this.id}}">{{this.title}}</a></td>
+                        <td>{{this.description}}</td>
+                        <td>{{this.groupid}}</td>
+                        <td>
+                            <a href="/study_plans/edit/{{this.id}}">Редактировать</a>
+                            <a href="#" class="delete-plan" data-plan-id="{{this.id}}">Удалить</a>
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            // Обработчик клика по ссылке "Удалить"
+            $('.delete-plan').click(function(e){
+                e.preventDefault();
+                var planId = $(this).data('plan-id');
+                var trElement = $(this).closest('tr'); // Получаем родительскую строку таблицы
+
+                $.ajax({
+                    url: '/study_plans/delete/' + planId,
+                    type: 'GET',
+                    success: function(data){
+                        // Успешно удаленный учебный план удаляем из DOM
+                        trElement.remove();
+
+                        // Показываем тост с сообщением об успешном удалении
+                        M.toast({html: 'Учебный план успешно удален', classes: 'rounded'});
+                    },
+                    error: function(jqXHR){
+                        var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при удалении учебного плана';
+                        M.toast({html: message, classes: 'rounded red lighten-1'});
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

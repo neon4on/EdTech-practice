@@ -6,11 +6,14 @@ const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
 const authRouter = require('./routes/auth');
-const groupRoutes = require('./routes/group');
+const groupRouter = require('./routes/group');
+const studyplanRoutes = require('./routes/study_plan');
+
 
 const app = express();
 
 const hbs = exphbs.create({ extname: '.hbs' });
+
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
@@ -32,10 +35,14 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/auth', authRouter); 
-app.use('/groups', groupRoutes);
+app.use('/groups', groupRouter);
+
+// учебный план Наиль
+app.use('/study_plans', studyplanRoutes);
 
 app.get('/', (req, res) => {
   res.render('index', { title: 'Home' });
+
 });
 
 const PORT = process.env.PORT || 3000;
