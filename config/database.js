@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize('edtech_practice', 'postgres', '1234', {
-  host: 'localhost',
+const sequelize = new Sequelize('timetable', 'platonsrv', 'platonpass', {
+  host: 'platon.teyhd.ru',
   dialect: 'postgres',
 });
 
