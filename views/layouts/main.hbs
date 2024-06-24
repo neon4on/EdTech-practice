@@ -6,11 +6,12 @@
     <title>{{title}}</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
+{{> head}}
 <body>
+    {{> header}}
     <div class="container">
         {{> sidebar}}
         <div class="main-content">
-            {{> header}}
             <main class="content">
                 {{{body}}}
             </main>
