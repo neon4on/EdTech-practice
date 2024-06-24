@@ -1,11 +1,4 @@
-<html lang='en'>
-  <head>
-    <meta charset='UTF-8' />
-    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-    <title>{{title}}</title>
-    <link rel='stylesheet' href='/css/styles.css' />
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
-  </head>
+
   <body>
     <h1>Вход</h1>
     <form id='login-form' action='/auth/login' method='POST'>
@@ -23,22 +16,21 @@
           const form = $(this);
           $.post(form.attr('action'), form.serialize()).done(function(response) {
             if (response.message === 'Вход выполнен успешно') {
-              alert(response.message);
+              M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
               setTimeout(function() {
                 window.location.href = '/';
               }, 1500);
             } else {
-              alert(response.message);
+              M.toast({html: response.message, classes: 'rounded red'});
             }
           }).fail(function(xhr) {
             if (xhr.responseJSON && xhr.responseJSON.message) {
-              alert(xhr.responseJSON.message);
+              M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
             } else {
-              alert('Произошла ошибка при попытке входа');
+              M.toast({html: 'Произошла ошибка при попытке входа', classes: 'rounded red'});
             }
           });
         });
       });
     </script>
-  </body>
-</html>
+ 
