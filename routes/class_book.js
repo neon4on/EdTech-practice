@@ -72,7 +72,7 @@ router.get('/:id', async (req, res) => {
       lesson.topic = topics[index % topics.length]; // Повторение тем, если их меньше чем уроков
     });
 
-    res.render('class_book', { 
+    res.render('class_book/class_book', { 
       title: studyPlan.title, 
       teacher, 
       subject, 
