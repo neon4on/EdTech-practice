@@ -23,33 +23,58 @@
   
   <form id="markForm">
     <label for="subject">Выберите предмет:</label>
-    <div class="input-field col s12">
-    <select multiple id="subject" name="subject" >
-      
-      <!-- Опции будут добавлены динамически -->
-    </select>
-    </div>
+    <select id="subject" name="subject"></select>
     
     <label for="class">Выберите класс:</label>
-    <select id="class" name="class" disabled>
-      <!-- Опции будут добавлены динамически -->
-    </select>
+    <select id="class" name="class" disabled></select>
     
     <button type="submit">Загрузить таблицу</button>
   </form>
   
-  <div id="schedule">
-    <!-- Здесь будет динамически добавлена таблица с оценками -->
+  <div id="schedule"></div>
+
+  <div id="gradeModal" style="display:none;">
+    <div>
+      <label for="grade1">Оценка 1:</label>
+      <input type="number" id="grade1" min="1" max="5">
+      <label for="weight1">Вес 1:</label>
+      <select id="weight1">
+        <option value="3">Контрольная работа</option>
+        <option value="2">Практическая работа</option>
+        <option value="1">Оценка за урок/домашняя работа</option>
+      </select>
+    </div>
+    <div>
+      <label for="grade2">Оценка 2:</label>
+      <input type="number" id="grade2" min="1" max="5">
+      <label for="weight2">Вес 2:</label>
+      <select id="weight2">
+        <option value="3">Контрольная работа</option>
+        <option value="2">Практическая работа</option>
+        <option value="1">Оценка за урок/домашняя работа</option>
+      </select>
+    </div>
+    <div>
+      <label for="grade3">Оценка 3:</label>
+      <input type="number" id="grade3" min="1" max="5">
+      <label for="weight3">Вес 3:</label>
+      <select id="weight3">
+        <option value="3">Контрольная работа</option>
+        <option value="2">Практическая работа</option>
+        <option value="1">Оценка за урок/домашняя работа</option>
+      </select>
+    </div>
+    <div>
+      <label for="comment">Комментарий:</label>
+      <textarea id="comment"></textarea>
+    </div>
+    <button id="saveGradeBtn">Сохранить</button>
   </div>
 
-  <!-- Ваш клиентский JavaScript для взаимодействия с сервером -->
   <script>
     document.addEventListener('DOMContentLoaded', async function() {
       try {
         const subjectsResponse = await fetch('/mark/subjects-and-classes');
-        if (!subjectsResponse.ok) {
-          throw new Error('Failed to fetch subjects and classes');
-        }
         const data = await subjectsResponse.json();
         const subjectsSelect = document.getElementById('subject');
         const classesSelect = document.getElementById('class');
@@ -68,27 +93,26 @@
 
           if (selectedSubject) {
             const classesResponse = await fetch(`/mark/classes?subject=${selectedSubject}`);
-            if (classesResponse.ok) {
-              const classesData = await classesResponse.json();
-              classesData.classes.forEach(klass => {
-                const option = document.createElement('option');
-                option.value = klass;
-                option.textContent = klass;
-                classesSelect.appendChild(option);
-              });
-              classesSelect.disabled = false;
-            } else {
-              console.error('Failed to fetch classes');
-            }
+            const classesData = await classesResponse.json();
+            classesData.classes.forEach(klass => {
+              const option = document.createElement('option');
+              option.value = klass;
+              option.textContent = klass;
+              classesSelect.appendChild(option);
+            });
+            classesSelect.disabled = false;
           }
         });
-
       } catch (error) {
         console.error('Error fetching subjects and classes:', error);
       }
 
       const form = document.getElementById('markForm');
       const scheduleDiv = document.getElementById('schedule');
+      const gradeModal = document.getElementById('gradeModal');
+      const saveGradeBtn = document.getElementById('saveGradeBtn');
+      let currentStudent = null;
+      let currentDate = null;
 
       form.addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -98,20 +122,13 @@
 
         try {
           const response = await fetch(`/mark/schedule?subject=${subject}&class=${classValue}`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch schedule');
-          }
           const data = await response.json();
 
-          // Очищаем предыдущие данные
           scheduleDiv.innerHTML = '';
-
-          // Создаем таблицу с расписанием
           const table = document.createElement('table');
           const thead = document.createElement('thead');
           const tbody = document.createElement('tbody');
 
-          // Создаем заголовки таблицы
           const headerRow = document.createElement('tr');
           const studentHeader = document.createElement('th');
           studentHeader.textContent = 'Ученик';
@@ -126,7 +143,6 @@
           thead.appendChild(headerRow);
           table.appendChild(thead);
 
-          // Заполняем таблицу данными
           data.students.forEach(student => {
             const studentRow = document.createElement('tr');
             const studentCell = document.createElement('td');
@@ -135,8 +151,13 @@
 
             data.dates.forEach(date => {
               const dateCell = document.createElement('td');
-              // Здесь можно добавить логику для вывода оценок или других данных
-              dateCell.textContent = ''; // Заменить на нужные данные
+              dateCell.dataset.student = student;
+              dateCell.dataset.date = date;
+              dateCell.addEventListener('click', () => {
+                currentStudent = student;
+                currentDate = date;
+                gradeModal.style.display = 'block';
+              });
               studentRow.appendChild(dateCell);
             });
 
@@ -150,6 +171,52 @@
           console.error('Error fetching schedule:', error);
         }
       });
+
+      saveGradeBtn.addEventListener('click', async function() {
+        const grade1 = document.getElementById('grade1').value;
+        const weight1 = document.getElementById('weight1').value;
+        const grade2 = document.getElementById('grade2').value;
+        const weight2 = document.getElementById('weight2').value;
+        const grade3 = document.getElementById('grade3').value;
+        const weight3 = document.getElementById('weight3').value;
+        const comment = document.getElementById('comment').value;
+
+        const cell = document.querySelector(`td[data-student="${currentStudent}"][data-date="${currentDate}"]`);
+        cell.textContent = `Оценки: ${grade1}(${getWeightText(weight1)}), ${grade2}(${getWeightText(weight2)}), ${grade3}(${getWeightText(weight3)})\nКомментарий: ${comment}`;
+
+        try {
+          const response = await fetch('/mark/save-grades', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              student: currentStudent,
+              date: currentDate,
+              grades: [
+                { grade: grade1, weight: getWeightText(weight1) },
+                { grade: grade2, weight: getWeightText(weight2) },
+                { grade: grade3, weight: getWeightText(weight3) },
+              ],
+              comment: comment,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to save grades');
+          }
+
+          gradeModal.style.display = "none";
+        } catch (error) {
+          console.error('Error saving grades:', error);
+        }
+      });
+
+      function getWeightText(weightValue) {
+        return weightValue === '3' ? 'Контрольная работа' :
+               weightValue === '2' ? 'Практическая работа' :
+               weightValue === '1' ? 'Оценка за урок/домашняя работа' : '';
+      }
     });
   </script>
 </body>
