@@ -6,9 +6,9 @@ const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
 const authRouter = require('./routes/auth');
-const groupRouter = require('./routes/group');
+const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
-
+const classBookRoutes = require('./routes/class_book');  // Добавьте этот маршрут
 
 // Инициализация приложения
 const app = express();
@@ -35,11 +35,12 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Маршруты
 app.use('/auth', authRouter); 
-app.use('/groups', groupRouter);
-
-// учебный план Наиль
+app.use('/groups', groupRoutes);
 app.use('/study_plans', studyplanRoutes);
+app.use('/class_book', classBookRoutes);  // Используйте этот маршрут
+
 
 app.get('/', (req, res) => {
   res.render('index', { title: 'Home' });
