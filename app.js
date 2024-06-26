@@ -6,9 +6,10 @@ const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
 const authRouter = require('./routes/auth');
-const groupRouter = require('./routes/group');
+const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
-
+const classBookRoutes = require('./routes/class_book');
+const markRoutes = require('./routes/mark'); // Подключаем markRoutes
 
 const app = express();
 
@@ -34,15 +35,14 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/auth', authRouter); 
-app.use('/groups', groupRouter);
-
-// учебный план Наиль
+app.use('/auth', authRouter);
+app.use('/groups', groupRoutes);
 app.use('/study_plans', studyplanRoutes);
+app.use('/class_book', classBookRoutes); // Исправленный путь для classBookRoutes
+app.use('/mark', markRoutes); // Подключаем markRoutes с базовым путем /mark
 
 app.get('/', (req, res) => {
   res.render('index', { title: 'Home' });
-
 });
 
 const PORT = process.env.PORT || 3000;
