@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Выставление оценок</title>
-  <script src="/routes/mark.js" defer></script>
   <style>
     table {
       width: 100%;
@@ -100,124 +99,136 @@
               option.textContent = klass;
               classesSelect.appendChild(option);
             });
-            classesSelect.disabled = false;
+            classesSelect.disabled = false; // Включаем select после загрузки классов
           }
         });
+
+        const form = document.getElementById('markForm');
+        const scheduleDiv = document.getElementById('schedule');
+        const gradeModal = document.getElementById('gradeModal');
+        const saveGradeBtn = document.getElementById('saveGradeBtn');
+        let currentStudent = null;
+        let currentDate = null;
+
+        form.addEventListener('submit', async function(event) {
+          event.preventDefault();
+
+          const subject = document.getElementById('subject').value;
+          const classValue = document.getElementById('class').value;
+
+          try {
+            const response = await fetch(`/mark/schedule?subject=${subject}&class=${classValue}`);
+            const data = await response.json();
+
+            scheduleDiv.innerHTML = '';
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            const headerRow = document.createElement('tr');
+            const studentHeader = document.createElement('th');
+            studentHeader.textContent = 'Ученик';
+            headerRow.appendChild(studentHeader);
+
+            data.dates.forEach(date => {
+              const dateHeader = document.createElement('th');
+              dateHeader.textContent = date;
+              headerRow.appendChild(dateHeader);
+            });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            data.students.forEach(student => {
+              const studentRow = document.createElement('tr');
+              const studentCell = document.createElement('td');
+              studentCell.textContent = student;
+              studentRow.appendChild(studentCell);
+
+              data.dates.forEach(date => {
+                const dateCell = document.createElement('td');
+                dateCell.dataset.student = student;
+                dateCell.dataset.date = date;
+                dateCell.addEventListener('click', () => {
+                  currentStudent = student;
+                  currentDate = date;
+                  gradeModal.style.display = 'block';
+                });
+                studentRow.appendChild(dateCell);
+              });
+
+              tbody.appendChild(studentRow);
+            });
+
+            table.appendChild(tbody);
+            scheduleDiv.appendChild(table);
+
+          } catch (error) {
+            console.error('Error fetching schedule:', error);
+          }
+        });
+
+        saveGradeBtn.addEventListener('click', async function() {
+          const grade1 = document.getElementById('grade1').value;
+          const weight1 = document.getElementById('weight1').value;
+          const grade2 = document.getElementById('grade2').value;
+          const weight2 = document.getElementById('weight2').value;
+          const grade3 = document.getElementById('grade3').value;
+          const weight3 = document.getElementById('weight3').value;
+          const comment = document.getElementById('comment').value;
+
+          const cell = document.querySelector(`td[data-student="${currentStudent}"][data-date="${currentDate}"]`);
+          cell.textContent = `Оценки: ${grade1}(${getWeightText(weight1)}), ${grade2}(${getWeightText(weight2)}), ${grade3}(${getWeightText(weight3)})\nКомментарий: ${comment}`;
+
+          try {
+            const response = await fetch('/mark/save-grades', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                student: currentStudent,
+                date: currentDate,
+                grades: [
+                  { grade: grade1, weight: getWeightText(weight1) },
+                  { grade: grade2, weight: getWeightText(weight2) },
+                  { grade: grade3, weight: getWeightText(weight3) },
+                ],
+                comment: comment,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to save grades');
+            }
+
+            gradeModal.style.display = "none";
+
+            // Обновляем расписание после сохранения оценок
+            const scheduleResponse = await fetch(`/mark/schedule?subject=${subject}&class=${classValue}`);
+            const updatedData = await scheduleResponse.json();
+
+            // Находим ячейку, которую нужно обновить
+            const updatedCell = document.querySelector(`td[data-student="${currentStudent}"][data-date="${currentDate}"]`);
+            updatedCell.textContent = `Оценки: ${grade1}(${getWeightText(weight1)}), ${grade2}(${getWeightText(weight2)}), ${grade3}(${getWeightText(weight3)})\nКомментарий: ${comment}`;
+
+          } catch (error) {
+            console.error('Error saving grades:', error);
+          }
+        });
+
+        function getWeightText(weightValue) {
+          return weightValue === '3' ? 'Контрольная работа' :
+                 weightValue === '2' ? 'Практическая работа' :
+                 weightValue === '1' ? 'Оценка за урок/домашняя работа' : '';
+        }
+
       } catch (error) {
         console.error('Error fetching subjects and classes:', error);
       }
-
-      const form = document.getElementById('markForm');
-      const scheduleDiv = document.getElementById('schedule');
-      const gradeModal = document.getElementById('gradeModal');
-      const saveGradeBtn = document.getElementById('saveGradeBtn');
-      let currentStudent = null;
-      let currentDate = null;
-
-      form.addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const subject = document.getElementById('subject').value;
-        const classValue = document.getElementById('class').value;
-
-        try {
-          const response = await fetch(`/mark/schedule?subject=${subject}&class=${classValue}`);
-          const data = await response.json();
-
-          scheduleDiv.innerHTML = '';
-          const table = document.createElement('table');
-          const thead = document.createElement('thead');
-          const tbody = document.createElement('tbody');
-
-          const headerRow = document.createElement('tr');
-          const studentHeader = document.createElement('th');
-          studentHeader.textContent = 'Ученик';
-          headerRow.appendChild(studentHeader);
-
-          data.dates.forEach(date => {
-            const dateHeader = document.createElement('th');
-            dateHeader.textContent = date;
-            headerRow.appendChild(dateHeader);
-          });
-
-          thead.appendChild(headerRow);
-          table.appendChild(thead);
-
-          data.students.forEach(student => {
-            const studentRow = document.createElement('tr');
-            const studentCell = document.createElement('td');
-            studentCell.textContent = student;
-            studentRow.appendChild(studentCell);
-
-            data.dates.forEach(date => {
-              const dateCell = document.createElement('td');
-              dateCell.dataset.student = student;
-              dateCell.dataset.date = date;
-              dateCell.addEventListener('click', () => {
-                currentStudent = student;
-                currentDate = date;
-                gradeModal.style.display = 'block';
-              });
-              studentRow.appendChild(dateCell);
-            });
-
-            tbody.appendChild(studentRow);
-          });
-
-          table.appendChild(tbody);
-          scheduleDiv.appendChild(table);
-
-        } catch (error) {
-          console.error('Error fetching schedule:', error);
-        }
-      });
-
-      saveGradeBtn.addEventListener('click', async function() {
-        const grade1 = document.getElementById('grade1').value;
-        const weight1 = document.getElementById('weight1').value;
-        const grade2 = document.getElementById('grade2').value;
-        const weight2 = document.getElementById('weight2').value;
-        const grade3 = document.getElementById('grade3').value;
-        const weight3 = document.getElementById('weight3').value;
-        const comment = document.getElementById('comment').value;
-
-        const cell = document.querySelector(`td[data-student="${currentStudent}"][data-date="${currentDate}"]`);
-        cell.textContent = `Оценки: ${grade1}(${getWeightText(weight1)}), ${grade2}(${getWeightText(weight2)}), ${grade3}(${getWeightText(weight3)})\nКомментарий: ${comment}`;
-
-        try {
-          const response = await fetch('/mark/save-grades', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              student: currentStudent,
-              date: currentDate,
-              grades: [
-                { grade: grade1, weight: getWeightText(weight1) },
-                { grade: grade2, weight: getWeightText(weight2) },
-                { grade: grade3, weight: getWeightText(weight3) },
-              ],
-              comment: comment,
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to save grades');
-          }
-
-          gradeModal.style.display = "none";
-        } catch (error) {
-          console.error('Error saving grades:', error);
-        }
-      });
-
-      function getWeightText(weightValue) {
-        return weightValue === '3' ? 'Контрольная работа' :
-               weightValue === '2' ? 'Практическая работа' :
-               weightValue === '1' ? 'Оценка за урок/домашняя работа' : '';
-      }
     });
   </script>
+
+
 </body>
 </html>
