@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Журнал</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <style>
+    th.fixed, td.fixed {
+      position: sticky;
+      left: 0;
+      background: white;
+      z-index: 2;
+    }
+    td input[type="number"] {
+      width: 50px;
+    }
+    .table-container {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Журнал</h1>
+    <div class="input-field">
+      <select id="subject-select" class="browser-default">
+        <option value="" disabled selected>Выберите предмет</option>
+      </select>
+      <label for="subject-select">Выберите предмет:</label>
+    </div>
+    <div class="input-field">
+      <select id="class-select" class="browser-default" disabled>
+        <option value="" disabled selected>Выберите класс</option>
+      </select>
+      <label for="class-select">Выберите класс:</label>
+    </div>
+    <div class="input-field">
+      <select id="category-select" class="browser-default" disabled>
+        <option value="" disabled selected>Выберите категорию</option>
+      </select>
+      <label for="category-select">Выберите категорию оценки:</label>
+    </div>
+    <div class="table-container">
+      <table id="students-table" class="striped">
+        <thead>
+          <tr>
+            <th class="fixed" colspan="2">Ученик</th>
+            <th id="june-header" colspan="0">Июнь</th>
+            <th id="july-header" colspan="0">Июль</th>
+          </tr>
+          <tr id="dates-row">
+            <th class="fixed">Имя</th>
+            <th class="fixed">Фамилия</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      function loadSubjects() {
+        console.log('Loading subjects...');
+        $.get('/class_book/subjects')
+          .done(function(data) {
+            console.log('Subjects data:', data);
+            const subjectSelect = $('#subject-select');
+            subjectSelect.empty().append('<option value="" disabled selected>Выберите предмет</option>');
+            data.forEach(function(subject) {
+              subjectSelect.append(`<option value="${subject.id}">${subject.name}</option>`);
+            });
+            subjectSelect.formSelect();
+            console.log('Subjects loaded successfully');
+          })
+          .fail(function(xhr) {
+            console.error('Ошибка загрузки предметов:', xhr);
+          });
+      }
+
+      function loadClasses() {
+        console.log('Loading classes...');
+        $.get('/class_book/classes')
+          .done(function(data) {
+            console.log('Classes ', data);
+            const classSelect = $('#class-select');
+            classSelect.empty().append('<option value="" disabled selected>Выберите класс</option>');
+            data.forEach(function(cls) {
+              classSelect.append(`<option value="${cls.id}">${cls.name}</option>`);
+            });
+            classSelect.prop('disabled', false).formSelect();
+            console.log('Classes loaded successfully');
+          })
+          .fail(function(xhr) {
+            console.error('Ошибка загрузки классов:', xhr);
+          });
+      }
+
+      function loadGradeWeights() {
+        console.log('Loading grade weights...');
+        $.get('/class_book/grade_weights')
+          .done(function(data) {
+            console.log('Grade weights ', data);
+            const categorySelect = $('#category-select');
+            categorySelect.empty().append('<option value="" disabled selected>Выберите категорию</option>');
+            data.forEach(function(category) {
+              categorySelect.append(`<option value="${category.category}" data-weight="${category.weight}">${category.category}</option>`);
+            });
+            categorySelect.prop('disabled', false).formSelect();
+            console.log('Grade weights loaded successfully');
+          })
+          .fail(function(xhr) {
+            console.error('Ошибка загрузки категорий:', xhr);
+          });
+      }
+
+      function loadExistingGrades() {
+        const classId = $('#class-select').val();
+        const subjectId = $('#subject-select').val();
+        const category = $('#category-select').val();
+
+        if (classId && subjectId && category) {
+          $.get('/class_book/existing-grades', { classId: classId, subjectId: subjectId })
+            .done(function(data) {
+              console.log('Existing grades:', data);
+              data.forEach(function(grade) {
+                const input = $(`input[data-student-id="${grade.student_id}"][data-date="${grade.date}"][data-category="${category}"]`);
+                if (input.length) {
+                  input.val(grade.grade);
+                }
+              });
+            })
+            .fail(function(xhr) {
+              console.error('Ошибка загрузки существующих оценок:', xhr);
+            });
+        }
+      }
+
+      function loadStudentsAndSchedule() {
+        const classId = $('#class-select').val();
+        const subjectId = $('#subject-select').val();
+        const category = $('#category-select').val();
+
+        console.log('Loading students and schedule:', { classId, subjectId, category });
+
+        if (classId && subjectId && category) {
+          $.get('/class_book/students', { classId: classId })
+            .done(function(data) {
+              console.log('Students ', data);
+              if (data && data.length > 0) {
+                const tableBody = $('#students-table tbody');
+                tableBody.empty();
+                data.forEach(function(student) {
+                  tableBody.append(`
+                    <tr data-student-id="${student.id}">
+                      <td class="fixed">${student.firstname}</td>
+                      <td class="fixed">${student.lastname}</td>
+                    </tr>
+                  `);
+                });
+                console.log('Students loaded successfully');
+              } else {
+                console.log('No students data received');
+              }
+            })
+            .fail(function(xhr) {
+              console.error('Ошибка загрузки учеников:', xhr);
+            });
+
+          $.get('/class_book/schedule', { subjectId: subjectId, classId: classId })
+            .done(function(data) {
+              console.log('Schedule ', data);
+              const datesRow = $('#dates-row');
+              const juneHeader = $('#june-header');
+              const julyHeader = $('#july-header');
+
+              datesRow.find('th:not(.fixed)').remove();
+              juneHeader.attr('colspan', 0);
+              julyHeader.attr('colspan', 0);
+
+              data.forEach(function(item) {
+                const header = item.month === 'June' ? juneHeader : julyHeader;
+                header.attr('colspan', parseInt(header.attr('colspan')) + 1);
+                datesRow.append(`<th data-date="${item.fullDate}">${item.date} ${item.weekDay}</th>`);
+              });
+
+              console.log('Adding input fields for grades');
+              $('#students-table tbody tr').each(function() {
+                const row = $(this);
+                const studentId = row.data('student-id');
+                data.forEach(function(item) {
+                  row.append(`
+                    <td>
+                      <input type="number" min="2" max="5" 
+                        data-student-id="${studentId}" 
+                        data-date="${item.fullDate}" 
+                        data-category="${category}" 
+                        data-weight="${$('#category-select option:selected').data('weight')}">
+                    </td>
+                  `);
+                });
+              });
+              console.log('Input fields added successfully');
+              loadExistingGrades();
+            })
+            .fail(function(xhr) {
+              console.error('Ошибка загрузки расписания:', xhr);
+            });
+        }
+      }
+
+      loadSubjects();
+      loadExistingGrades();
+
+      $('#subject-select').change(function() {
+        console.log('Subject changed');
+        loadClasses();
+        loadGradeWeights();
+      });
+
+      $('#class-select, #category-select').change(function() {
+        console.log('Class or category changed');
+        loadStudentsAndSchedule();
+        loadExistingGrades();
+      });
+
+      $('#students-table').on('focus', 'input[type="number"]', function() {
+        $(this).attr('data-previous-value', $(this).val());
+      });
+
+      $('#students-table').on('change', 'input[type="number"]', function() {
+        const input = $(this);
+        const data = {
+          studentId: input.data('student-id'),
+          classId: $('#class-select').val(),
+          subjectId: $('#subject-select').val(),
+          date: input.data('date'),
+          category: input.data('category'),
+          weight: input.data('weight'),
+          grade: input.val()
+        };
+
+        console.log('Saving grade:', data);
+
+        if (!data.studentId) {
+          console.error('student_id is undefined');
+          return;
+        }
+
+        $.ajax({
+          url: '/class_book/grade',
+          method: 'POST',
+           data,
+          success: function() {
+            console.log('Grade saved successfully');
+            loadExistingGrades(); // Обновляем отображение оценок
+          },
+          error: function(xhr) {
+            console.error('Ошибка сохранения оценки:', xhr);
+            // Откатываем изменение в случае ошибки
+            input.val(input.attr('data-previous-value') || '');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

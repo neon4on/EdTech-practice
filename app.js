@@ -8,8 +8,8 @@ const sequelize = require('./config/database');
 const authRouter = require('./routes/auth');
 const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
-const classBookRoutes = require('./routes/class_book');
-const markRoutes = require('./routes/mark'); // Подключаем markRoutes
+const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
+const markRoutes = require('./routes/mark');
 
 const app = express();
 
@@ -38,8 +38,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/auth', authRouter);
 app.use('/groups', groupRoutes);
 app.use('/study_plans', studyplanRoutes);
-app.use('/class_book', classBookRoutes); // Исправленный путь для classBookRoutes
-app.use('/mark', markRoutes); // Подключаем markRoutes с базовым путем /mark
+app.use('/class_book', classBookRoutes); // Используем маршрут для журнала
+app.use('/mark', markRoutes);
 
 app.get('/', (req, res) => {
   res.render('index', { title: 'Home' });
