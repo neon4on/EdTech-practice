@@ -5,11 +5,12 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const sequelize = require('./config/database');
+const bcrypt = require('bcrypt'); // Не забудьте подключить bcrypt
 const authRouter = require('./routes/auth');
 const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
-const classBookRoutes = require('./routes/class_book');
-const markRoutes = require('./routes/mark'); // Подключаем markRoutes
+const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
+const indexRoutes = require('./routes/index');
 
 const app = express();
 
@@ -35,15 +36,54 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/auth', authRouter);
-app.use('/groups', groupRoutes);
-app.use('/study_plans', studyplanRoutes);
-app.use('/class_book', classBookRoutes); // Исправленный путь для classBookRoutes
-app.use('/mark', markRoutes); // Подключаем markRoutes с базовым путем /mark
-
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Home' });
+// Middleware для проверки аутентификации
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = !!req.session.user;
+  next();
 });
+
+// Перенаправляем корневой маршрут на страницу авторизации, если пользователь не авторизован
+app.get('/', (req, res) => {
+  if (req.session.user) {
+    res.redirect('/index');
+  } else {
+    res.redirect('/auth/login');
+  }
+});
+
+app.get('/index', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/auth/login');
+  }
+  res.render('index', { title: 'Главная страница' });
+});
+
+// Защищаем маршруты от неавторизованных пользователей
+app.use('/groups', (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/auth/login');
+  }
+  next();
+}, groupRoutes);
+
+app.use('/study_plans', (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/auth/login');
+  }
+  next();
+}, studyplanRoutes);
+
+app.use('/class_book', (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/auth/login');
+  }
+  next();
+}, classBookRoutes);
+
+app.use('/auth', authRouter);
+
+// Остальные маршруты...
+app.use('/index', indexRoutes);
 
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {
