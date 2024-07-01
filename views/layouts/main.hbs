@@ -10,7 +10,9 @@
 <body>
     {{> header}}
     <div class="container">
-        {{> sidebar}}
+        {{#if isAuthenticated}}
+            {{> sidebar}}
+        {{/if}}
         <div class="main-content">
             <main class="content">
                 {{{body}}}
