@@ -1,4 +1,3 @@
-
 const express = require('express');
 const exphbs = require('express-handlebars');
 const path = require('path');
@@ -13,7 +12,6 @@ const studyplanRoutes = require('./routes/study_plan');
 const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
 const indexRoutes = require('./routes/index');
 
-// Инициализация приложения
 const app = express();
 
 const hbs = exphbs.create({ extname: '.hbs' });
