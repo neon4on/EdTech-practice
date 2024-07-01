@@ -130,6 +130,7 @@ router.post('/login', async (req, res) => {
     replacements: [email],
   });
 
+
   if (results.length === 0) {
     return res.status(404).json({ message: 'Пользователь с таким email не найден' });
   }
