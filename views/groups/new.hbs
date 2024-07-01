@@ -1,12 +1,40 @@
-<h1>Создать новую учебную группу</h1>
-<form action='/groups' method='POST'>
-  <label for='name'>Название:</label>
-  <input type='text' id='name' name='name' required />
-  <label for='description'>Описание:</label>
-  <input type='text' id='description' name='description' />
-  <label for='direction'>Направление:</label>
-  <input type='text' id='direction' name='direction' required />
-  <label for='course'>Курс:</label>
-  <input type='number' id='course' name='course' required />
-  <button type='submit'>Создать</button>
-</form>
+<body>
+  <div class="col-12 d-flex justify-content-center">
+    <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/groups">Все группы</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Создание новой группы</li>
+    </ol>
+  </nav>
+</div>
+  <h1>Создать новую учебную группу</h1>
+  <form id='new-group-form' action='/groups/new' method='POST'>
+    <label for='name'>Название:</label>
+    <input type='text' id='name' name='name' required />
+    <button type='submit' class="btn">Создать</button>
+  </form>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $("#new-group-form").submit(function(e) {
+        e.preventDefault();
+        const form = $(this);
+        $.post(form.attr('action'), form.serialize()).done(function(response) {
+          if (response.message === 'Группа успешно создана!') {
+            M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
+            $("#new-group-form").trigger("reset");
+          } else {
+            M.toast({html: response.message, classes: 'rounded red'});
+          }
+        }).fail(function(xhr) {
+          if (xhr.responseJSON && xhr.responseJSON.message) {
+            M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
+          } else {
+            M.toast({html: 'Ошибка: не удалось создать группу!', classes: 'rounded red'});
+          }
+        });
+      });
+    });
+  </script>
+</body>
