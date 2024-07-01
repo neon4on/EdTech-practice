@@ -3,49 +3,53 @@ const sequelize = require('../config/database');
 
 const router = express.Router();
 
-// Получение списка всех групп
+// Получение списка всех групп и рендеринг страницы
 router.get('/', async (req, res) => {
-  const [groups, metadata] = await sequelize.query('SELECT * FROM groups');
-  res.json(groups);
-});
-
-// Создание новой группы
-router.post('/', async (req, res) => {
-  const { name, description, direction, course } = req.body;
-  await sequelize.query(
-    'INSERT INTO groups (name, description, direction, course) VALUES (?, ?, ?, ?)',
-    { replacements: [name, description, direction, course] },
-  );
-  res.status(201).json({ message: 'Group created' });
-});
-
-// Получение конкретной группы по ID
-router.get('/:id', async (req, res) => {
-  const [groups, metadata] = await sequelize.query('SELECT * FROM groups WHERE id = ?', {
-    replacements: [req.params.id],
-  });
-  const group = groups[0];
-  if (group) {
-    res.json(group);
-  } else {
-    res.status(404).send('Group not found');
+  try {
+    const [groups, metadata] = await sequelize.query('SELECT * FROM classes');
+    res.render('groups', { groups });
+  } catch (error) {
+    console.error('Ошибка при получении данных из базы:', error);
+    res.status(500).send('Ошибка сервера');
   }
 });
 
-// Обновление существующей группы
-router.put('/:id', async (req, res) => {
-  const { name, description, direction, course } = req.body;
-  await sequelize.query(
-    'UPDATE groups SET name = ?, description = ?, direction = ?, course = ? WHERE id = ?',
-    { replacements: [name, description, direction, course, req.params.id] },
-  );
-  res.json({ message: 'Group updated' });
+
+
+// Получение конкретной группы по ID
+router.get('/:id', async (req, res) => {
+  try {
+    // Получение информации о группе
+    const [groupResult] = await sequelize.query('SELECT * FROM classes WHERE id = ?', {
+      replacements: [req.params.id],
+    });
+    const group = groupResult[0];
+
+    if (!group) {
+      return res.status(404).send('Group not found');
+    }
+
+    // Получение списка студентов, связанных с этой группой
+    const [students] = await sequelize.query(`
+      SELECT users.id, users.firstname, users.lastname
+      FROM users
+      JOIN user_classes ON users.id = user_classes.user_id
+      WHERE user_classes.class_id = ? AND users.role = 'student'
+    `, {
+      replacements: [req.params.id],
+    });
+
+    // Рендеринг страницы с названием группы и списком студентов
+    res.render('groups/show', {
+      groupName: group.name,
+      students,
+    });
+  } catch (error) {
+    console.error('Ошибка при получении данных из базы:', error);
+    res.status(500).send('Ошибка сервера');
+  }
 });
 
-// Удаление группы
-router.delete('/:id', async (req, res) => {
-  await sequelize.query('DELETE FROM groups WHERE id = ?', { replacements: [req.params.id] });
-  res.status(204).send();
-});
+
 
 module.exports = router;
