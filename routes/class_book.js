@@ -41,6 +41,18 @@ router.get('/classes', async (req, res) => {
   }
 });
 
+// router.get('/load-subjects', async (req, res) => {
+//   try {
+//     const [classes] = await sequelize.query('SELECT id, name FROM subjects');
+//     res.json(classes);
+//   } catch (error) {
+//     console.error('Error loading subjects:', error);
+//     res.status(500).json({ message: 'Ошибка загрузки subjectов' });
+//   }
+// });
+
+
+
 router.get('/students', async (req, res) => {
   const { classId } = req.query;
   if (!req.session.user || req.session.user.role !== 'teacher') {

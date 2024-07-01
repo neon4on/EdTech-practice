@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{groupName}}</title>
+    
+</head>
+<body>
+    <h1>Группа: {{groupName}}</h1>
+    <h2>Список студентов:</h2>
+    <div class="container">
+        {{#if students.length}}
+            <ul>
+                {{#each students}}
+                    <li>{{this.firstname}} {{this.lastname}}</li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p>В этой группе пока нет студентов.</p>
+        {{/if}}
+    </div>
+    <a href="/groups">Вернуться к списку групп</a>
+  
+</body>
+</html>

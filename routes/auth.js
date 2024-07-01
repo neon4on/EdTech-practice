@@ -1,10 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const sequelize = require('../config/database');
 const router = express.Router();
 
-// Маршрут для загрузки классов
 router.get('/classes', async (req, res) => {
   try {
     const [classes] = await sequelize.query('SELECT name FROM classes');
@@ -15,6 +13,17 @@ router.get('/classes', async (req, res) => {
     res.status(500).json({ message: 'Ошибка загрузки классов' });
   }
 });
+
+router.get('/subjects', async (req, res) => {
+  try {
+    const [subjects] = await sequelize.query('SELECT name FROM subjects');
+    res.json(subjects);
+  } catch (error) {
+    console.error('Ошибка загрузки предметов:', error);
+    res.status(500).json({ message: 'Ошибка загрузки предметов' });
+  }
+});
+
 
 router.get('/register', (req, res) => {
   res.render('auth/register', { title: 'Регистрация' });
@@ -53,7 +62,7 @@ router.post('/register', async (req, res) => {
         const [subject] = await sequelize.query('SELECT id FROM subjects WHERE name = ?', {
           replacements: [subjectName],
         });
-
+    
         let subjectId;
         if (subject.length > 0) {
           subjectId = subject[0].id;
@@ -63,12 +72,13 @@ router.post('/register', async (req, res) => {
           });
           subjectId = newSubject[0].id;
         }
-
+    
         await sequelize.query('INSERT INTO user_subjects (user_id, subject_id) VALUES (?, ?)', {
           replacements: [user[0].id, subjectId],
         });
       }
     }
+    
 
     if (role === 'student') {
       let classId;
@@ -138,6 +148,16 @@ router.post('/login', async (req, res) => {
   };
 
   res.json({ message: 'Вход выполнен успешно' });
+});
+
+router.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка при выходе' });
+    }
+    res.clearCookie('connect.sid');
+    res.json({ message: 'Выход выполнен успешно' });
+  });
 });
 
 module.exports = router;

@@ -28,20 +28,24 @@
       <input type='password' id='password' name='password' required />
     </div>
     <div class="input-field">
-      <label for='role'>Роль:</label>
+      <div><label for='role'>Роль:</label></div>
       <select id='role' name='role' class="browser-default" required>
-        <option value='' disabled selected>Выберите роль</option>
+        <option value='' disabled selected></option>
         <option value='student'>Студент</option>
         <option value='teacher'>Преподаватель</option>
+        <option value='method'>Методист</option>
         <option value='admin'>Администратор</option>
       </select>
     </div>
 
-    <div id='subjects-container' style='display: none;'>
-      <label for='subject'>Предмет:</label>
-      <input type='text' class='subject' name='subjects[]' />
-      <button type='button' id='add-subject'>Добавить предмет</button>
-    </div>
+ <div id='subjects-container' style='display: none;'>
+  <label for='subject-select'>Выберите предмет(ы):</label>
+  <select id='subject-select' name='subjects[]' class="browser-default" >
+    <option value='' >Выберите предмет(ы)</option>
+    <!-- Предметы будут загружены через JS -->
+  </select>
+</div>
+
 
     <div id='classes-container' style='display: none;'>
       <label for='class-select'>Выберите класс:</label>
@@ -60,71 +64,85 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script>
-  $(document).ready(function() {
-    // Инициализация select элемента Materialize
-    $('select').formSelect();
+   $(document).ready(function() {
+  // Инициализация select элементов Materialize
+  $('select').formSelect();
 
-    // Ограничение ввода в поля имени и фамилии
-    $("#firstName, #lastName").on('input', function() {
-      this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '');
+  // Ограничение ввода в поля имени и фамилии
+  $("#firstName, #lastName").on('input', function() {
+    this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '');
+  });
+
+  $('#role').change(function() {
+    if ($(this).val() === 'teacher') {
+      $('#subjects-container').show();
+      $('#classes-container').hide();
+      loadSubjects();
+    } else if ($(this).val() === 'student') {
+      $('#classes-container').show();
+      $('#subjects-container').hide();
+      loadClasses();
+    } else {
+      $('#subjects-container').hide();
+      $('#classes-container').hide();
+    }
+  });
+
+  function loadSubjects() {
+    $.get('/auth/subjects', function(data) {
+      console.log('Loaded subjects:', data);
+      const select = $('#subject-select');
+      select.empty();
+      select.append('<option value="" disabled>Выберите предмет(ы)</option>');
+      data.forEach(function(subj) {
+        select.append('<option value="' + subj.name + '">' + subj.name + '</option>');
+      });
+      select.formSelect();
+    }).fail(function(xhr) {
+      console.error('Ошибка загрузки предметов:', xhr);
     });
+  }
 
-    $('#role').change(function() {
-      if ($(this).val() === 'teacher') {
-        $('#subjects-container').show();
-        $('#classes-container').hide();
-      } else if ($(this).val() === 'student') {
-        $('#classes-container').show();
-        $('#subjects-container').hide();
-        loadClasses();
+  function loadClasses() {
+    $.get('/auth/classes', function(data) {
+      console.log('Loaded classes:', data);
+      const select = $('#class-select');
+      select.empty();
+      select.append('<option value="" disabled selected>Выберите класс</option>');
+      data.forEach(function(cls) {
+        select.append('<option value="' + cls.name + '">' + cls.name + '</option>');
+      });
+      select.formSelect();
+    }).fail(function(xhr) {
+      console.error('Ошибка загрузки классов:', xhr);
+    });
+  }
+
+  $("#register-form").submit(function(e) {
+    e.preventDefault();
+    const form = $(this);
+    $.post(form.attr('action'), form.serialize()).done(function(response) {
+      if (response.message === 'Пользователь с таким email уже существует') {
+        M.toast({html: response.message, classes: 'rounded red'});
+      } else if (response.message === 'Регистрация прошла успешно') {
+        M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
+        setTimeout(function() {
+          window.location.href = '/auth/login';
+        }, 1500);
       } else {
-        $('#subjects-container').hide();
-        $('#classes-container').hide();
+        M.toast({html: response.message, classes: 'rounded red'});
+      }
+    }).fail(function(xhr) {
+      if (xhr.responseJSON && xhr.responseJSON.message) {
+        M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
+      } else {
+        M.toast({html: 'Произошла ошибка при попытке регистрации', classes: 'rounded red'});
       }
     });
-
-    $('#add-subject').click(function() {
-      $('<input type="text" class="subject" name="subjects[]" />').insertBefore(this);
-    });
-
-    function loadClasses() {
-      $.get('/auth/classes', function(data) { // Измените URL на /auth/classes
-        console.log('Loaded classes:', data); // Логирование для отладки
-        const select = $('#class-select');
-        select.empty();
-        select.append('<option value="">Выберите класс</option>');
-        data.forEach(function(cls) {
-          select.append('<option value="' + cls.name + '">' + cls.name + '</option>');
-        });
-        select.formSelect(); // Обновите select элемент Materialize после изменения
-      }).fail(function(xhr) {
-        console.error('Ошибка загрузки классов:', xhr); // Логирование ошибок
-      });
-    }
-
-    $("#register-form").submit(function(e) {
-      e.preventDefault();
-      const form = $(this);
-      $.post(form.attr('action'), form.serialize()).done(function(response) {
-        if (response.message === 'Пользователь с таким email уже существует') {
-          M.toast({html: response.message, classes: 'rounded red'});
-        } else if (response.message === 'Регистрация прошла успешно') {
-          M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
-          setTimeout(function() {
-            window.location.href = '/auth/login';
-          }, 1500);
-        } else {
-          M.toast({html: response.message, classes: 'rounded red'});
-        }
-      }).fail(function(xhr) {
-        if (xhr.responseJSON && xhr.responseJSON.message) {
-          M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
-        } else {
-          M.toast({html: 'Произошла ошибка при попытке регистрации', classes: 'rounded red'});
-        }
-      });
-    });
   });
+});
+
+
 </script>
 </body>
 </html>
