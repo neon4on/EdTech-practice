@@ -6,11 +6,21 @@
   </div>
   <nav class="menu">
     <ul>
-      <li><a href="/schedule">Расписание</a></li>
-      <li><a href="/groups">Группы</a></li>
-      <li><a href="/study_plans">Учебные планы</a></li>
-      <li><a href="/class_book">Журнал</a></li>
-    <li><a href="/auth/register">Регистрация</a></li>
+
+{{#if (isAdmin)}} <!-- Проверка роли "admin" -->
+        <li><a href="/schedule">Расписание</a></li>
+        <li><a href="/groups">Группы</a></li>
+        <li><a href="/study_plans">Учебные планы</a></li>
+        <li><a href="/class_book">Журнал</a></li>
+      {{else if (isTeacher)}} <!-- Проверка роли "teacher" -->
+        <li><a href="/schedule">Расписание</a></li>
+        <li><a href="/study_plans">Учебные планы</a></li>
+        <li><a href="/class_book">Журнал</a></li>
+      {{else}} <!-- Проверка роли "student" -->
+        <li><a href="/schedule">Расписание</a></li>
+        <li><a href="/class_book">Журнал</a></li>
+      {{/if}}
+
     </ul>
   </nav>
 </aside>
