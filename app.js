@@ -1,4 +1,3 @@
-
 const express = require('express');
 const exphbs = require('express-handlebars');
 const path = require('path');
@@ -12,10 +11,18 @@ const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
 const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
 const indexRoutes = require('./routes/index');
+const attendanceRoutes = require('./routes/attendance');
 
 const app = express();
 
-const hbs = exphbs.create({ extname: '.hbs' });
+const hbs = exphbs.create({
+  extname: '.hbs',
+  helpers: {
+    eq: function (v1, v2) {
+      return v1 === v2;
+    }
+  }
+}); 
 
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
@@ -34,6 +41,11 @@ app.use(
     saveUninitialized: false,
   }),
 );
+
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -82,6 +94,13 @@ app.use('/class_book', (req, res, next) => {
 }, classBookRoutes);
 
 app.use('/auth', authRouter);
+
+app.use('/attendance', (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/auth/login');
+  }
+  next();
+}, attendanceRoutes);
 
 // Остальные маршруты...
 app.use('/index', indexRoutes);
