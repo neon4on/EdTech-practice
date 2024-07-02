@@ -61,11 +61,12 @@
             <span>ООО "Онлайн Платоникс"</span>
         </div>
         <div class="header-right">
-            <span>Имя пользователя</span>
+            <span>{{user.firstname}} {{user.lastname}}</span> <!-- Изменено -->
             <button onclick="logout()">Выйти</button>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
@@ -82,8 +83,12 @@
         }
 
         function logout() {
-            // Логика выхода
-            alert("Выход из системы");
+            $.post('/auth/logout').done(function(response) {
+                alert(response.message);
+                window.location.href = '/auth/login';
+            }).fail(function(xhr) {
+                alert('Ошибка при выходе: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'неизвестная ошибка'));
+            });
         }
     </script>
 </body>

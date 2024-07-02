@@ -1,17 +1,15 @@
 const express = require('express');
 const router = express.Router();
 
+// router.get('/', (req, res) => {
+//   res.render('index', { title: 'Home' });
+// });
+
+
 router.get('/', (req, res) => {
-  res.render('index', { title: 'Home' });
+  const user = req.session.user || null;
+  res.render('index', { user });
 });
-
-
-// Маршрут для рендеринга страницы mark
-router.get('/', (req, res) => {
-  res.render('mark'); // Здесь 'mark' - это название вашего шаблона mark.hbs
-});
-
-module.exports = router;
 
 
 module.exports = router;
