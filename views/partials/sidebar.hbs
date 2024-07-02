@@ -12,12 +12,15 @@
           <li><a href="/groups">Группы</a></li>
           <li><a href="/study_plans">Учебные планы</a></li>
           <li><a href="/class_book">Журнал</a></li>
+          <li><a href="/register">Регистрация</a></li>
         {{else if (eq user.role "teacher")}}
           <li><a href="/schedule">Расписание</a></li>
           <li><a href="/study_plans">Учебные планы</a></li>
           <li><a href="/class_book">Журнал</a></li>
+          <li><a href="/grade">Оценки</a></li>
         {{else if (eq user.role "student")}}
           <li><a href="/schedule">Расписание</a></li>
+          <li><a href="/grade">Оценки</a></li>
         {{/if}}
       {{/if}}
     </ul>

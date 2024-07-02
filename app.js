@@ -103,7 +103,7 @@ app.use('/attendance', (req, res, next) => {
 }, attendanceRoutes);
 
 // Остальные маршруты...
-app.use('/index', indexRoutes);
+app.use('/index', indexRoutes); 
 
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {

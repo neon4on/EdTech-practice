@@ -20,7 +20,7 @@
 
 <script>
 function loadAttendance() {
-  fetch('/attendance/{{id}}')
+  fetch('/attendance?user_id={{id}}')
     .then(response => response.json())
     .then(absences => {
       const list = document.getElementById('attendance-list');
@@ -38,12 +38,12 @@ document.getElementById('attendance-form').addEventListener('submit', function(e
   const date = document.getElementById('date').value;
   const type = document.getElementById('type').value;
   const comment = document.getElementById('comment').value;
-  fetch('/attendance/{{id}}', {
+  fetch('/attendance', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ date, type, comment }),
+    body: JSON.stringify({ id: {{id}}, date, type, comment }),
   })
   .then(response => response.json())
   .then(data => {
@@ -54,5 +54,6 @@ document.getElementById('attendance-form').addEventListener('submit', function(e
     console.error('Error:', error);
   });
 });
-</script>
 
+window.onload = loadAttendance;
+</script>
