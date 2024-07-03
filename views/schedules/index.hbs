@@ -1,0 +1,19 @@
+<h1>Расписание группы {{groupName}}</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Время</th>
+            <th>Предмет</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each schedule}}
+        <tr>
+            <td>{{this.date}}</td>
+            <td>{{this.time}}</td>
+            <td>{{this.subject_name}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
