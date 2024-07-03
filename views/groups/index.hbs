@@ -8,20 +8,19 @@
 <body>
     
     <div class="content" id="content">
-    <h1>Учебные группы</h1>
+    
     <div class="container">
+        <h1>Учебные группы</h1>
+       
+        <button onclick="window.location.href='/groups/new'" class="waves-effect waves-light btn">Создать группу</button>
         <table>
             <thead>
                 <tr>
                     <th>Название</th>
                     <th>Действия</th>
                     <th>
-                        <button onclick="window.location.href='/groups/new'" class="waves-effect waves-light btn">
-                            Создать
-                    <th>
-                        <button onclick="window.location.href='/groups/new'" class="waves-effect waves-light btn">
-                            Создать группу
-                        </button>
+                        
+                        
                     </th>
                 </tr>
             </thead>
@@ -30,9 +29,9 @@
                     <tr id="class-{{this.id}}">
                         <td><a href="/groups/{{this.id}}">{{this.name}}</a></td>
                         <td>
-                            <a href="/groups/{{this.id}}/edit">Редактировать</a>
+                            <a href="/groups/{{this.id}}/edit" class="btn">Редактировать</a>
                             <form action="/groups/{{this.id}}?_method=DELETE" method="POST" style="display:inline;">
-                                <button type="submit">Удалить</button>
+                                <button type="submit" class="btn">Удалить</button>
                             </form>
                         </td>
                   
