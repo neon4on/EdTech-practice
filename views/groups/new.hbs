@@ -1,4 +1,5 @@
 <body>
+  <div class="content" id="content">
   <div class="col-12 d-flex justify-content-center">
     <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -13,6 +14,7 @@
     <input type='text' id='name' name='name' required />
     <button type='submit' class="btn">Создать</button>
   </form>
+  </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
@@ -36,5 +38,23 @@
         });
       });
     });
+
+     function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+            function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+            }
   </script>
 </body>

@@ -3,40 +3,44 @@
 <head>
     <title>Создать учебный план</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    
+   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
-    <h1 class="center-align">Создать новый учебный план</h1>
-    <form id="studyPlanForm" enctype="multipart/form-data">
-        <label for="title">Название:</label><br>
-        <input type="text" id="title" name="title" required><br>
-        <label for="description">Описание:</label><br>
-        <input type="text" id="description" name="description" required><br>
-        <label for="subjectid">Предмет:</label><br>
-        <select id="subjectid" name="subjectid" required></select><br>
-        <label for="classid">Класс:</label><br>
-        <select id="classid" name="classid" required></select><br>
-        
-        <div class="file-field input-field">
-            <div class="btn">
-                <span>Добавить файл</span>
-                <input type="file" id="file" name="file" required>
+    
+
+    <div class="content" id="content">
+        <h1 class="center-align">Создать новый учебный план</h1>
+        <form id="studyPlanForm" enctype="multipart/form-data">
+            <label for="title">Название:</label><br>
+            <input type="text" id="title" name="title" required><br>
+            <label for="description">Описание:</label><br>
+            <input type="text" id="description" name="description" required><br>
+            <label for="subjectid">Предмет:</label><br>
+            <select id="subjectid" name="subjectid" required></select><br>
+            <label for="classid">Класс:</label><br>
+            <select id="classid" name="classid" required></select><br>
+            
+            <div class="file-field input-field">
+                <div class="btn">
+                    <span>Добавить файл</span>
+                    <input type="file" id="file" name="file" required>
+                </div>
+                <div class="file-path-wrapper">
+                    <input class="file-path validate" type="text" placeholder="Выберите файл">
+                </div>
             </div>
-            <div class="file-path-wrapper">
-                <input class="file-path validate" type="text" placeholder="Выберите файл">
-            </div>
-        </div>
-        <button type="submit" id="btnNewStPlan" class="btn">Создать</button>
-        <button type="button" onclick="window.location.href='/study_plans'" class="waves-effect waves-light btn">Вернуться назад</button>
-    </form>
+            <button type="submit" id="btnNewStPlan" class="btn">Создать</button>
+            <button type="button" onclick="window.location.href='/study_plans'" class="waves-effect waves-light btn">Вернуться назад</button>
+        </form>
+    </div>
 
     <script>
         $(document).ready(function() {
-            // Initialize materialize components
             $('select').formSelect();
 
-            // Fetch available subjects and classes
             $.get('/study_plans/subjects', function(data) {
                 data.forEach(subject => {
                     $('#subjectid').append(`<option value="${subject.id}">${subject.name}</option>`);
@@ -51,39 +55,65 @@
                 $('select').formSelect();
             });
 
-            // Submit form with AJAX
-           $("#btnNewStPlan").click(function(e) {
-            e.preventDefault();
-            var formData = new FormData($("#studyPlanForm")[0]);
+            $("#btnNewStPlan").click(function(e) {
+                e.preventDefault();
+                var formData = new FormData($("#studyPlanForm")[0]);
 
-            if (!$("#file")[0].files.length) {
-                M.toast({html: 'Ошибка: файл не добавлен', classes: 'rounded'});
-                return;
-            }
-
-            $.ajax({
-                url: "/study_plans/new",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(data) {
-                    if (data.message === "Study plan created") {
-                        M.toast({html: 'Учебный план успешно создан', classes: 'rounded'});
-                        setTimeout(function() {
-                            window.location.href = 'http://localhost:3000/study_plans';
-                        }, 3000); // Переход через 3 секунды
-                    } else {
-                        M.toast({html: 'Ошибка при создании учебного плана', classes: 'rounded'});
-                    }
-                },
-                error: function(jqXHR) {
-                    var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при создании учебного плана';
-                    M.toast({html: message, classes: 'rounded'});
+                if (!$("#file")[0].files.length) {
+                    M.toast({html: 'Ошибка: файл не добавлен', classes: 'rounded'});
+                    return;
                 }
+
+                $.ajax({
+                    url: "/study_plans/new",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(data) {
+                        if (data.message === "Study plan created") {
+                            M.toast({html: 'Учебный план успешно создан', classes: 'rounded'});
+                            setTimeout(function() {
+                                window.location.href = 'http://localhost:3000/study_plans';
+                            }, 3000);
+                        } else {
+                            M.toast({html: 'Ошибка при создании учебного плана', classes: 'rounded'});
+                        }
+                    },
+                    error: function(jqXHR) {
+                        var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при создании учебного плана';
+                        M.toast({html: message, classes: 'rounded'});
+                    }
+                });
             });
         });
-        });
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+        }
+
+        function logout() {
+            $.post('/auth/logout').done(function(response) {
+                alert(response.message);
+                window.location.href = '/auth/login';
+            }).fail(function(xhr) {
+                alert('Ошибка при выходе: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'неизвестная ошибка'));
+            });
+        }
     </script>
 </body>
 </html>

@@ -8,6 +8,7 @@
 </head>
 <body>
 
+<div class="content" id="content">
 <div class="container">
   <h1>Регистрация</h1>
   <form id='register-form' action='/auth/register' method='POST'>
@@ -59,6 +60,7 @@
 
     <button type='submit' class="btn">Зарегистрироваться</button>
   </form>
+</div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -142,6 +144,26 @@
   });
 });
 
+            function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+            function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+
+           
+
+        }
 
 </script>
 </body>

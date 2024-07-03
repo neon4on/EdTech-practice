@@ -7,6 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
+    <div class="content" id="content">
    <h1 class="center-align">Учебные планы</h1>
     <div class="container">
         <table>
@@ -37,7 +38,7 @@
             </tbody>
         </table>
     </div>
-
+</div>
     <script>
         $(document).ready(function(){
             // Обработчик клика по ссылке "Удалить"
@@ -63,6 +64,23 @@
                 });
             });
         });
+         function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+            function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+            }
     </script>
 </body>
 </html>

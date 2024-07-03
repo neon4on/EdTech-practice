@@ -1,3 +1,5 @@
+<div class="content" id="content">
+
 <h1>Отсутствия для студента с ID {{id}}</h1>
 
 <form id="attendance-form">
@@ -17,7 +19,7 @@
 </ul>
 
 <button onclick="loadAttendance()">Обновить список отсутствий</button>
-
+</div>
 <script>
 function loadAttendance() {
   fetch('/attendance?user_id={{id}}')
@@ -56,4 +58,23 @@ document.getElementById('attendance-form').addEventListener('submit', function(e
 });
 
 window.onload = loadAttendance;
+
+
+ function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+            function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+            }
 </script>

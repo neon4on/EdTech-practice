@@ -12,7 +12,6 @@ const studyplanRoutes = require('./routes/study_plan');
 const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
 const indexRoutes = require('./routes/index');
 const attendanceRoutes = require('./routes/attendance');
-
 const app = express();
 
 const hbs = exphbs.create({
@@ -48,6 +47,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/EdTech-practice/public', express.static(path.join(__dirname, 'public')));
 
 // Middleware для проверки аутентификации
 app.use((req, res, next) => {

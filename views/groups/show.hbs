@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>{{groupName}}</title>
+
+</head>
+<body>
+  <div class="content" id="content">
+    <h1>Группа: {{groupName}}</h1>
     <link rel="stylesheet" href="path/to/your/styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
@@ -17,6 +22,7 @@
       <button class="delete-group-button" type="submit">Удалить</button>
     </form>
    </span>
+
     <h2>Список студентов:</h2>
     <div class="container">
         {{#if students.length}}
@@ -29,7 +35,9 @@
             <p>В этой группе пока нет студентов.</p>
         {{/if}}
     </div>
-    
+
+    <a href="/groups">Вернуться к списку групп</a>
+  </div>
     <script>
   $(document).ready(function() {
     $(".delete-group-form").submit(function(e) {
@@ -53,7 +61,26 @@
       });
     });
   });
+
+   function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+            function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+            }
 </script>
+
 
 </body>
 </html>
