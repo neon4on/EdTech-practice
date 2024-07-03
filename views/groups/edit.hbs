@@ -1,12 +1,58 @@
+<div class="content" id="content">
 <h1>Редактировать учебную группу</h1>
-<form action='/groups/{{group.id}}?_method=PUT' method='POST'>
+<a href="/groups">Вернуться к списку групп</a>
+<form id='edit-group-form' action='/groups/{{group.id}}' method='POST'>
   <label for='name'>Название:</label>
   <input type='text' id='name' name='name' value='{{group.name}}' required />
-  <label for='description'>Описание:</label>
-  <input type='text' id='description' name='description' value='{{group.description}}' />
-  <label for='direction'>Направление:</label>
-  <input type='text' id='direction' name='direction' value='{{group.direction}}' required />
-  <label for='course'>Курс:</label>
-  <input type='number' id='course' name='course' value='{{group.course}}' required />
-  <button type='submit'>Сохранить изменения</button>
+  <button type='submit'>Изменить</button>
 </form>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $("#edit-group-form").submit(function(e) {
+      e.preventDefault();
+      const form = $(this);
+      $.post(form.attr('action'), form.serialize()).done(function(response) {
+        if (response.message === 'Данные группы успешно обновлены!') {
+          M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
+          setTimeout(function() {
+            location.reload();
+          }, 2000);
+        } else {
+          M.toast({html: response.message, classes: 'rounded red'});
+        }
+      }).fail(function(xhr) {
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+          M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
+        } else {
+          M.toast({html: 'Ошибка: данные группы не удалось изменить!', classes: 'rounded red'});
+        }
+      });
+    });
+  });
+
+  
+            function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+            function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+
+           
+
+        }
+</script>

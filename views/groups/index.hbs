@@ -1,13 +1,67 @@
-<h1>Учебные группы</h1>
-<ul>
-  {{#each groups}}
-    <li>
-      <a href='/groups/{{this.id}}'>{{this.name}}</a>
-      <a href='/groups/{{this.id}}/edit'>Редактировать</a>
-      <form action='/groups/{{this.id}}?_method=DELETE' method='POST' style='display:inline;'>
-        <button type='submit'>Удалить</button>
-      </form>
-    </li>
-  {{/each}}
-</ul>
-<a href='/groups/new'>Добавить новую группу</a>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Учебные группы</title>
+    
+</head>
+<body>
+    
+    <div class="content" id="content">
+    <h1>Учебные группы</h1>
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Действия</th>
+                    <th>
+                        <button onclick="window.location.href='/groups/new'" class="waves-effect waves-light btn">
+                            Создать
+                    <th>
+                        <button onclick="window.location.href='/groups/new'" class="waves-effect waves-light btn">
+                            Создать группу
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each groups}}
+                    <tr id="class-{{this.id}}">
+                        <td><a href="/groups/{{this.id}}">{{this.name}}</a></td>
+                        <td>
+                            <a href="/groups/{{this.id}}/edit">Редактировать</a>
+                            <form action="/groups/{{this.id}}?_method=DELETE" method="POST" style="display:inline;">
+                                <button type="submit">Удалить</button>
+                            </form>
+                        </td>
+                  
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+    <script>
+                    function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+            function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+
+           
+
+        }
+    </script>

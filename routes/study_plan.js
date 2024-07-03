@@ -10,8 +10,34 @@ const router = express.Router();
 // Получить все учебные планы
 router.get('/', async (req, res) => {
   try {
-    const [results] = await sequelize.query('SELECT * FROM studyPlans');
-    res.render('study_plans', { title: 'Учебные планы', studyPlans: results });
+    const [studyPlans] = await sequelize.query(`
+      SELECT sp.id, sp.title, sp.description, sp.classid, c.name as classname
+      FROM studyPlans sp
+      LEFT JOIN classes c ON sp.classid = c.id
+    `);
+    res.render('study_plans', { title: 'Учебные планы', studyPlans });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred' });
+  }
+});
+
+// Получить все предметы
+router.get('/subjects', async (req, res) => {
+  try {
+    const [subjects] = await sequelize.query('SELECT id, name FROM subjects');
+    res.status(200).json(subjects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred' });
+  }
+});
+
+// Получить все классы
+router.get('/classes', async (req, res) => {
+  try {
+    const [classes] = await sequelize.query('SELECT id, name FROM classes');
+    res.status(200).json(classes);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'An error occurred' });
@@ -19,8 +45,15 @@ router.get('/', async (req, res) => {
 });
 
 // Показать форму для создания нового учебного плана
-router.get('/new', (req, res) => {
-  res.render('study_plans/new', { title: 'Создать новый учебный план' });
+router.get('/new', async (req, res) => {
+  try {
+    const [subjects] = await sequelize.query('SELECT * FROM subjects');
+    const [classes] = await sequelize.query('SELECT * FROM classes');
+    res.render('study_plans/new', { title: 'Создать новый учебный план', subjects, classes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'An error occurred' });
+  }
 });
 
 // Показать детали учебного плана
@@ -74,8 +107,17 @@ router.get('/:id', async (req, res) => {
 
 // Создать новый учебный план с файлом
 router.post('/new', upload.single('file'), async (req, res) => {
-  const { title, description, groupId } = req.body;
+  const { title, description, subjectid, classid } = req.body;
   const file = req.file;
+  const userId = req.session.user.id;  // Получаем ID текущего пользователя из сессии
+
+  // Выводим значения для отладки
+  console.log('title:', title);
+  console.log('description:', description);
+  console.log('subjectid:', subjectid);
+  console.log('classid:', classid);
+  console.log('file:', file);
+  console.log('userId:', userId);
 
   if (!file) {
     console.error('No file attached');
@@ -99,8 +141,8 @@ router.post('/new', upload.single('file'), async (req, res) => {
     const fileId = fileResults[0].id;
 
     const [studyPlanResults] = await sequelize.query(
-      'INSERT INTO studyplans (title, description, groupid, file_id) VALUES (?, ?, ?, ?) RETURNING id',
-      { replacements: [title, description, groupId, fileId] },
+      'INSERT INTO studyplans (title, description, subjectid, classid, file_id, user_id) VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
+      { replacements: [title, description, subjectid, classid, fileId, userId] },
     );
 
     res.status(201).json({ message: 'Study plan created' });
@@ -125,11 +167,16 @@ router.get('/edit/:id', async (req, res) => {
 });
 
 // Обновить учебный план и заменить файл при наличии
-
-
 router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
-  const { title, description, groupId } = req.body;
+  const { title, description, subjectid, classid } = req.body;
   const file = req.file;
+
+  // Выводим значения для отладки
+  console.log('title:', title);
+  console.log('description:', description);
+  console.log('subjectid:', subjectid);
+  console.log('classid:', classid);
+  console.log('file:', file);
 
   try {
     // Получаем текущий файл, связанный с учебным планом
@@ -171,10 +218,10 @@ router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
 
     // Обновляем остальные поля учебного плана
     await sequelize.query(
-      'UPDATE studyplans SET title = ?, description = ?, groupid = ? WHERE id = ?',
-      { replacements: [title, description, groupId, req.params.id] },
+      'UPDATE studyplans SET title = ?, description = ?, subjectid = ?, classid = ? WHERE id = ?',
+      { replacements: [title, description, subjectid, classid, req.params.id] },
     );
-
+    
     // Успешное завершение операции
     res.status(200).json({ message: 'Study plan updated' });
   } catch (error) {
@@ -183,9 +230,7 @@ router.post('/edit/:id', upload.single('newFile'), async (req, res) => {
   }
 });
 
-
 // Удалить учебный план
-
 router.get('/delete/:id', async (req, res) => {
   try {
     // Получаем текущий файл, связанный с учебным планом

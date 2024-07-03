@@ -16,7 +16,9 @@
 <body>
     <h1 class="center-align">Посещаемость</h1>
     <div class="container">
-
+        <div class="top-right-btn">
+            <a href="/classes/table" class="btn waves-effect waves-light">Посмотреть таблицу</a>
+        </div>
 
         <!-- Выпадающий список для выбора группы -->
         <div class="input-field col s12">
@@ -36,7 +38,7 @@
 
         <!-- Форма для редактирования посещаемости ученика -->
         <div id="attendance-form" style="display: none;">
-            <h5>Редактировать посещаемость</h5>
+            <h5>Сообщить об отсутствии</h5>
             <div class="row">
                 <div class="input-field col s6">
                     <input type="text" class="datepicker" id="date-from">
@@ -50,10 +52,10 @@
             <div class="row">
                 <div class="input-field col s12">
                     <select id="attendance-type">
-                        <option value="" disabled selected>Выберите тип посещаемости</option>
-                        <option value="От">От</option>
-                        <option value="Н">Н</option>
-                        <option value="Уп">П</option>
+                        <option value="" disabled selected>Выберите причину отсутствия</option>
+                        <option value="Болезнь">Болезнь</option>
+                        <option value="Семейные обст.">Семейные обст.</option>
+                        <option value="Своя">Своя</option>
                     </select>
                     <label>Тип посещаемости</label>
                 </div>
@@ -82,7 +84,6 @@
                 var classId = $(this).val();
                 if (classId) {
                     $.get('/classes/class/' + classId, function(users) {
-                        console.log('Users:', users); // Проверка данных в браузере
                         var html = '<ul class="collection">';
                         users.forEach(function(user) {
                             html += '<li class="collection-item"><a href="#" class="student-link" data-user-id="' + user.id + '">' + user.firstname + ' ' + user.lastname + '</a></li>';
@@ -102,7 +103,6 @@
             $(document).on('click', '.student-link', function(e) {
                 e.preventDefault();
                 var userId = $(this).data('user-id');
-                console.log('Selected user ID:', userId);
                 $('#students-container .collection-item').hide();
                 $(this).closest('.collection-item').show();
                 $('#attendance-form').show().data('user-id', userId);
@@ -120,15 +120,11 @@
                 var attendanceType = $('#attendance-type').val();
                 var comment = $('#comment').val();
 
-                console.log('Saving attendance:', { userId, dateFrom, dateTo, attendanceType, comment });
-
-                // Проверка данных перед отправкой
                 if (!userId || !dateFrom || !dateTo || !attendanceType) {
                     M.toast({html: 'Пожалуйста, заполните все поля!'});
                     return;
                 }
 
-                // Отправка данных на сервер для сохранения
                 $.ajax({
                     url: '/classes/save-attendance',
                     method: 'POST',
@@ -141,7 +137,6 @@
                         comment: comment
                     }),
                     success: function(response) {
-                        console.log('Save response:', response);
                         M.toast({html: 'Посещаемость сохранена успешно!'});
                         $('#attendance-form').hide();
                         $('#attendance-form').find('input, select, textarea').val('');
@@ -150,7 +145,6 @@
                     },
                     error: function(error) {
                         M.toast({html: 'Ошибка при сохранении посещаемости!'});
-                        console.error('Error:', error);
                     }
                 });
             });

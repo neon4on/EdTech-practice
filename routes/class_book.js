@@ -2,6 +2,8 @@ const express = require('express');
 const sequelize = require('../config/database');
 const router = express.Router();
 const moment = require('moment');
+const fs = require('fs');
+const xlsx = require('xlsx');
 
 router.get('/', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'teacher') {
@@ -157,6 +159,52 @@ router.get('/existing-grades', async (req, res) => {
   } catch (error) {
     console.error('Error loading existing grades:', error);
     res.status(500).json({ message: 'Ошибка загрузки существующих оценок' });
+  }
+});
+
+// Получить темы учебного плана для указанного предмета и класса
+router.get('/study_plan', async (req, res) => {
+  const { subjectId, classId } = req.query;
+  try {
+    const [studyPlan] = await sequelize.query(`
+      SELECT sp.id, sp.title, sp.description, sp.classid, c.name as classname, sp.file_id
+      FROM studyplans sp
+      LEFT JOIN classes c ON sp.classid = c.id
+      WHERE sp.subjectid = ? AND sp.classid = ?
+    `, {
+      replacements: [subjectId, classId]
+    });
+
+    if (studyPlan.length === 0) {
+      return res.status(404).json({ message: 'Учебный план не найден' });
+    }
+
+    const fileId = studyPlan[0].file_id;
+
+    const [fileResults] = await sequelize.query('SELECT file_data FROM files WHERE id = ?', {
+      replacements: [fileId],
+    });
+
+    if (!fileResults || fileResults.length === 0) {
+      console.error('No file found');
+      return res.status(400).json({ message: 'No file found' });
+    }
+
+    const fileData = fileResults[0].file_data;
+    const fileBuffer = Buffer.from(fileData, 'binary');
+    const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const excelData = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
+    // Начинаем с 5-й строки (индекс 4), исключая заголовки
+    const topics = excelData.slice(5).map(row => row[0]);
+
+    console.log('Topics loaded:', topics); // Вывод тем в консоль
+
+    res.status(200).json({ topics });
+  } catch (error) {
+    console.error('Ошибка загрузки учебного плана:', error);
+    res.status(500).json({ message: 'Ошибка загрузки учебного плана' });
   }
 });
 

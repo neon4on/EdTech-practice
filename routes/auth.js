@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const sequelize = require('../config/database');
 const router = express.Router();
 
+
+
 router.get('/classes', async (req, res) => {
   try {
     const [classes] = await sequelize.query('SELECT name FROM classes');
@@ -13,6 +15,17 @@ router.get('/classes', async (req, res) => {
     res.status(500).json({ message: 'Ошибка загрузки классов' });
   }
 });
+
+router.get('/subjects', async (req, res) => {
+  try {
+    const [subjects] = await sequelize.query('SELECT name FROM subjects');
+    res.json(subjects);
+  } catch (error) {
+    console.error('Ошибка загрузки предметов:', error);
+    res.status(500).json({ message: 'Ошибка загрузки предметов' });
+  }
+});
+
 
 router.get('/register', (req, res) => {
   res.render('auth/register', { title: 'Регистрация' });
@@ -51,7 +64,7 @@ router.post('/register', async (req, res) => {
         const [subject] = await sequelize.query('SELECT id FROM subjects WHERE name = ?', {
           replacements: [subjectName],
         });
-
+    
         let subjectId;
         if (subject.length > 0) {
           subjectId = subject[0].id;
@@ -61,12 +74,13 @@ router.post('/register', async (req, res) => {
           });
           subjectId = newSubject[0].id;
         }
-
+    
         await sequelize.query('INSERT INTO user_subjects (user_id, subject_id) VALUES (?, ?)', {
           replacements: [user[0].id, subjectId],
         });
       }
     }
+    
 
     if (role === 'student') {
       let classId;
@@ -133,7 +147,9 @@ router.post('/login', async (req, res) => {
   req.session.user = {
     id: user.id,
     email: user.email,
-    role: user.role
+    role: user.role,
+    firstname: user.firstname, // Добавлено
+    lastname: user.lastname     // Добавлено
   };
 
   res.json({ message: 'Вход выполнен успешно' });

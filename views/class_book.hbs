@@ -6,49 +6,105 @@
   <title>Журнал</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
-    th.fixed, td.fixed {
+    .table-container {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    #students-table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    #students-table th, #students-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    #students-table th {
+      background-color: #f2f2f2;
+    }
+
+    #students-table td input[type="number"] {
+      width: 40px;
+      border: none;
+      text-align: center;
+    }
+
+    .fixed {
       position: sticky;
       left: 0;
       background: white;
       z-index: 2;
     }
-    td input[type="number"] {
-      width: 50px;
+
+    #month-row th, #dates-row th {
+      min-width: 80px;
     }
-    .table-container {
-      overflow-x: auto;
-      max-width: 100%;
+
+    .tooltip {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 9999;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #students-table th.fixed, #students-table td.fixed {
+      width: 150px;
+      min-width: 150px;
+      max-width: 150px;
+    }
+
+    .date-column {
+      min-width: 80px;
     }
   </style>
 </head>
 <body>
+  <div class="content" id="content">
   <div class="container">
     <h1>Журнал</h1>
     <div class="input-field">
       <select id="subject-select" class="browser-default">
         <option value="" disabled selected>Выберите предмет</option>
       </select>
-      <label for="subject-select"></label>
     </div>
     <div class="input-field">
       <select id="class-select" class="browser-default" disabled>
         <option value="" disabled selected>Выберите класс</option>
       </select>
-      <label for="class-select"></label>
     </div>
     <div class="input-field">
       <select id="category-select" class="browser-default" disabled>
         <option value="" disabled selected>Выберите категорию</option>
       </select>
-      <label for="category-select"></label>
     </div>
     <div class="table-container">
-      <table id="students-table" class="striped">
+      <table id="students-table">
         <thead>
-          <tr>
+          <tr id="month-row">
             <th class="fixed" colspan="2">Ученик</th>
-            <th id="june-header" colspan="0">Июнь</th>
-            <th id="july-header" colspan="0">Июль</th>
           </tr>
           <tr id="dates-row">
             <th class="fixed">Имя</th>
@@ -60,17 +116,31 @@
       </table>
     </div>
   </div>
+  </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script>
     
     $(document).ready(function() {
+      let studyPlanTopics = [];
+
+      function loadStudyPlanTopics(subjectId, classId) {
+        return $.get(`/class_book/study_plan`, { subjectId: subjectId, classId: classId })
+          .done(function(data) {
+            studyPlanTopics = data.topics;
+            console.log('Темы учебного плана загружены:', studyPlanTopics);
+          })
+          .fail(function(xhr) {
+            console.error('Ошибка загрузки тем учебного плана:', xhr);
+          });
+      }
+
       function loadSubjects() {
         console.log('Loading subjects...');
         $.get('/class_book/subjects')
           .done(function(data) {
-            console.log('Subjects data:', data);
+            console.log('Subjects ', data);
             const subjectSelect = $('#subject-select');
             subjectSelect.empty().append('<option value="" disabled selected>Выберите предмет</option>');
             data.forEach(function(subject) {
@@ -126,9 +196,8 @@
         const category = $('#category-select').val();
 
         if (classId && subjectId && category) {
-          $.get('/class_book/existing-grades', { classId: classId, subjectId: subjectId })
+          $.get('/class_book/existing-grades', { classId: classId, subjectId: subjectId, category: category })
             .done(function(data) {
-              console.log('Existing grades:', data);
               data.forEach(function(grade) {
                 const input = $(`input[data-student-id="${grade.student_id}"][data-date="${grade.date}"][data-category="${category}"]`);
                 if (input.length) {
@@ -147,76 +216,84 @@
         const subjectId = $('#subject-select').val();
         const category = $('#category-select').val();
 
-        console.log('Loading students and schedule:', { classId, subjectId, category });
-
         if (classId && subjectId && category) {
           $.get('/class_book/students', { classId: classId })
-            .done(function(data) {
-              console.log('Students ', data);
-              if (data && data.length > 0) {
-                const tableBody = $('#students-table tbody');
-                tableBody.empty();
-                data.forEach(function(student) {
-                  tableBody.append(`
-                    <tr data-student-id="${student.id}">
-                      <td class="fixed">${student.firstname}</td>
-                      <td class="fixed">${student.lastname}</td>
-                    </tr>
-                  `);
+            .done(function(studentsData) {
+              $.get('/class_book/schedule', { subjectId: subjectId, classId: classId })
+                .done(function(scheduleData) {
+                  const tableBody = $('#students-table tbody');
+                  const datesRow = $('#dates-row');
+                  const monthRow = $('#month-row');
+
+                  tableBody.empty();
+                  datesRow.find('th:not(.fixed)').remove();
+                  monthRow.find('th:not(.fixed)').remove();
+
+                  loadStudyPlanTopics(subjectId, classId).then(function() {
+                    scheduleData.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
+
+                    const monthGroups = scheduleData.reduce((groups, item) => {
+                      const date = new Date(item.fullDate);
+                      const month = date.toLocaleString('ru', { month: 'long' });
+                      if (!groups[month]) {
+                        groups[month] = [];
+                      }
+                      groups[month].push(item);
+                      return groups;
+                    }, {});
+
+                    let topicIndex = 0;
+
+                    Object.entries(monthGroups).forEach(([month, dates]) => {
+                      monthRow.append(`<th colspan="${dates.length}">${month}</th>`);
+                      dates.forEach(date => {
+                        const dateObj = new Date(date.fullDate);
+                        const day = dateObj.getDate();
+                        const weekDay = dateObj.toLocaleString('ru', { weekday: 'short' });
+                        const topic = studyPlanTopics[topicIndex] || 'Тема отсутствует';
+                        datesRow.append(`
+                          <th class="tooltip date-column" data-date="${date.fullDate}">
+                            ${day} ${weekDay}
+                            <span class="tooltiptext">Тема: ${topic}</span>
+                          </th>
+                        `);
+                        topicIndex++;
+                      });
+                    });
+
+                    studentsData.forEach(function(student) {
+                      let row = `<tr data-student-id="${student.id}">
+                                   <td class="fixed">${student.firstname}</td>
+                                   <td class="fixed">${student.lastname}</td>`;
+
+                      scheduleData.forEach(function(date) {
+                        row += `<td>
+                                  <input type="number" min="2" max="5" 
+                                    data-student-id="${student.id}" 
+                                    data-date="${date.fullDate}" 
+                                    data-category="${category}" 
+                                    data-weight="${$('#category-select option:selected').data('weight')}">
+                                </td>`;
+                      });
+
+                      row += '</tr>';
+                      tableBody.append(row);
+                    });
+
+                    loadExistingGrades();
+                  });
+                })
+                .fail(function(xhr) {
+                  console.error('Ошибка загрузки расписания:', xhr);
                 });
-                console.log('Students loaded successfully');
-              } else {
-                console.log('No students data received');
-              }
             })
             .fail(function(xhr) {
               console.error('Ошибка загрузки учеников:', xhr);
-            });
-
-          $.get('/class_book/schedule', { subjectId: subjectId, classId: classId })
-            .done(function(data) {
-              console.log('Schedule ', data);
-              const datesRow = $('#dates-row');
-              const juneHeader = $('#june-header');
-              const julyHeader = $('#july-header');
-
-              datesRow.find('th:not(.fixed)').remove();
-              juneHeader.attr('colspan', 0);
-              julyHeader.attr('colspan', 0);
-
-              data.forEach(function(item) {
-                const header = item.month === 'June' ? juneHeader : julyHeader;
-                header.attr('colspan', parseInt(header.attr('colspan')) + 1);
-                datesRow.append(`<th data-date="${item.fullDate}">${item.date} ${item.weekDay}</th>`);
-              });
-
-              console.log('Adding input fields for grades');
-              $('#students-table tbody tr').each(function() {
-                const row = $(this);
-                const studentId = row.data('student-id');
-                data.forEach(function(item) {
-                  row.append(`
-                    <td>
-                      <input type="number" min="2" max="5" 
-                        data-student-id="${studentId}" 
-                        data-date="${item.fullDate}" 
-                        data-category="${category}" 
-                        data-weight="${$('#category-select option:selected').data('weight')}">
-                    </td>
-                  `);
-                });
-              });
-              console.log('Input fields added successfully');
-              loadExistingGrades();
-            })
-            .fail(function(xhr) {
-              console.error('Ошибка загрузки расписания:', xhr);
             });
         }
       }
 
       loadSubjects();
-      loadExistingGrades();
 
       $('#subject-select').change(function() {
         console.log('Subject changed');
@@ -227,7 +304,6 @@
       $('#class-select, #category-select').change(function() {
         console.log('Class or category changed');
         loadStudentsAndSchedule();
-        loadExistingGrades();
       });
 
       $('#students-table').on('focus', 'input[type="number"]', function() {
@@ -259,16 +335,33 @@
            data,
           success: function() {
             console.log('Grade saved successfully');
-            loadExistingGrades(); // Обновляем отображение оценок
+            input.attr('data-previous-value', data.grade);
           },
           error: function(xhr) {
             console.error('Ошибка сохранения оценки:', xhr);
-            // Откатываем изменение в случае ошибки
             input.val(input.attr('data-previous-value') || '');
           }
         });
       });
     });
+
+    function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+            function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+            }
   </script>
 </body>
 </html>
