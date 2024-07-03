@@ -1,5 +1,5 @@
 <h1>Редактировать учебную группу</h1>
-<a href="/groups">Вернуться к списку групп</a>
+<a href="/groups/{{group.id}}">Вернуться к странице группы</a>
 <form id='edit-group-form' action='/groups/{{group.id}}' method='POST'>
   <label for='name'>Название:</label>
   <input type='text' id='name' name='name' value='{{group.name}}' required />

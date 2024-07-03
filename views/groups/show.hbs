@@ -12,6 +12,7 @@
  <h1>Группа: {{groupName}}</h1>
    <span><a href="/groups">Вернуться к списку групп</a></span>
    <span><a href="/groups/{{group.id}}/edit">Редактировать</a></span>
+   <span><a href="/groups/add_student/{{group.id}}">Добавить студента</a></span>
    <span>
     <form class="delete-group-form" action="/groups/{{group.id}}/delete" method="POST">
       <button class="delete-group-button" type="submit">Удалить</button>

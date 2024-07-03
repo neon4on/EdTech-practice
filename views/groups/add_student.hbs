@@ -1,0 +1,33 @@
+<h1>Добавить студента в группу</h1>
+<a href="/groups/{{group.id}}">Вернуться к странице группы</a>
+<form id="add-student-form" action="/groups/add_student/{{groupId}}" method="POST">
+  <input type="hidden" id="groupId" name="groupId" value="{{groupId}}" required />
+  <label for="studentId">Студент:</label>
+  <select id="studentId" name="studentId" class="browser-default" required>
+    {{#each students}}
+      <option value="{{this.id}}">{{this.firstname}} {{this.lastname}}</option>
+    {{/each}}
+  </select>
+  <button type="submit">Добавить студента</button>
+</form>
+
+<script>
+$(document).ready(function() {
+  // Обработчик формы добавления студента
+  $("#add-student-form").submit(function(e) {
+    e.preventDefault();
+    const form = $(this);
+    $.post(form.attr('action'), form.serialize())
+      .done(function(response) {
+        M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
+        setTimeout(function() {
+          location.reload();
+        }, 2000);
+      })
+      .fail(function(xhr) {
+        const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Ошибка: не удалось добавить студента в группу!';
+        M.toast({html: errorMessage, classes: 'rounded red'});
+      });
+  });
+});
+</script>

@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <!-- Подключение стилей -->
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <!-- Подключение Materialize CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Подключение скриптов -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
-{{> head}}
 <body>
-    {{> header}}
+    {{> header}} <!-- Включение шапки -->
     <div class="container">
         {{#if isAuthenticated}}
-            {{> sidebar}}
+            {{> sidebar}} <!-- Включение боковой панели -->
         {{/if}}
         <div class="main-content">
             <main class="content">
@@ -19,5 +24,31 @@
             </main>
         </div>
     </div>
+
+    <!-- Скрипты вашего приложения -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+        }
+
+        function logout() {
+            $.post('/auth/logout').done(function(response) {
+                alert(response.message);
+                window.location.href = '/auth/login';
+            }).fail(function(xhr) {
+                alert('Ошибка при выходе: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'неизвестная ошибка'));
+            });
+        }
+    </script>
 </body>
 </html>
