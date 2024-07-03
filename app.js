@@ -11,7 +11,7 @@ const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
 const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
 const indexRoutes = require('./routes/index');
-const attendanceRoutes = require('./routes/attendance');
+const attendanceRoutes = require('./routes/classes');
 
 const app = express();
 
@@ -95,7 +95,7 @@ app.use('/class_book', (req, res, next) => {
 
 app.use('/auth', authRouter);
 
-app.use('/attendance', (req, res, next) => {
+app.use('/classes', (req, res, next) => {
   if (!req.session.user) {
     return res.redirect('/auth/login');
   }
