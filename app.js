@@ -11,11 +11,7 @@ const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
 const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
 const indexRoutes = require('./routes/index');
-<<<<<<< HEAD
-=======
 const attendanceRoutes = require('./routes/attendance');
->>>>>>> nailka
-
 const app = express();
 
 const hbs = exphbs.create({
@@ -54,11 +50,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware для проверки аутентификации
 app.use((req, res, next) => {
-<<<<<<< HEAD
-  res.locals.isAuthenticated = !!req.session.user;
-=======
   res.locals.isAuthenticated = !!req.session.user || null;
->>>>>>> nailka
   next();
 });
 
@@ -102,10 +94,6 @@ app.use('/class_book', (req, res, next) => {
 
 app.use('/auth', authRouter);
 
-<<<<<<< HEAD
-// Остальные маршруты...
-app.use('/index', indexRoutes);
-=======
 app.use('/attendance', (req, res, next) => {
   if (!req.session.user) {
     return res.redirect('/auth/login');
@@ -115,7 +103,6 @@ app.use('/attendance', (req, res, next) => {
 
 // Остальные маршруты...
 app.use('/index', indexRoutes); 
->>>>>>> nailka
 
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {

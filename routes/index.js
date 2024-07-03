@@ -12,10 +12,4 @@ router.get('/', (req, res) => {
 });
 
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> nailka
 module.exports = router;

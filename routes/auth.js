@@ -3,11 +3,8 @@ const bcrypt = require('bcrypt');
 const sequelize = require('../config/database');
 const router = express.Router();
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> nailka
 router.get('/classes', async (req, res) => {
   try {
     const [classes] = await sequelize.query('SELECT name FROM classes');
