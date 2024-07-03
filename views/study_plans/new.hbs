@@ -13,28 +13,46 @@
         <input type="text" id="title" name="title" required><br>
         <label for="description">Описание:</label><br>
         <input type="text" id="description" name="description" required><br>
-        <label for="groupId">ID группы:</label><br>
-        <input type="text" id="groupId" name="groupId" required><br>
-        {{!-- <label for="file">Файл:</label><br>
-        <input type="file" id="file" name="file" required><br> --}}
-
+        <label for="subjectid">Предмет:</label><br>
+        <select id="subjectid" name="subjectid" required></select><br>
+        <label for="classid">Класс:</label><br>
+        <select id="classid" name="classid" required></select><br>
+        
         <div class="file-field input-field">
-                <div class="btn">
-                    <span>Добавить файл</span>
-                    <input type="file" id="file" name="file">
-                </div>
-                <div class="file-path-wrapper">
-                    <input class="file-path validate" type="text" placeholder="Выберите файл">
-                </div>
+            <div class="btn">
+                <span>Добавить файл</span>
+                <input type="file" id="file" name="file" required>
             </div>
+            <div class="file-path-wrapper">
+                <input class="file-path validate" type="text" placeholder="Выберите файл">
+            </div>
+        </div>
         <button type="submit" id="btnNewStPlan" class="btn">Создать</button>
-        <button onclick="window.location.href='/study_plans'" class="waves-effect waves-light btn">Вернуться назад</button>
-
-  </form>
-
+        <button type="button" onclick="window.location.href='/study_plans'" class="waves-effect waves-light btn">Вернуться назад</button>
+    </form>
 
     <script>
-        $("#btnNewStPlan").click(function(e) {
+        $(document).ready(function() {
+            // Initialize materialize components
+            $('select').formSelect();
+
+            // Fetch available subjects and classes
+            $.get('/study_plans/subjects', function(data) {
+                data.forEach(subject => {
+                    $('#subjectid').append(`<option value="${subject.id}">${subject.name}</option>`);
+                });
+                $('select').formSelect();
+            });
+
+            $.get('/study_plans/classes', function(data) {
+                data.forEach(cls => {
+                    $('#classid').append(`<option value="${cls.id}">${cls.name}</option>`);
+                });
+                $('select').formSelect();
+            });
+
+            // Submit form with AJAX
+           $("#btnNewStPlan").click(function(e) {
             e.preventDefault();
             var formData = new FormData($("#studyPlanForm")[0]);
 
@@ -64,6 +82,7 @@
                     M.toast({html: message, classes: 'rounded'});
                 }
             });
+        });
         });
     </script>
 </body>
