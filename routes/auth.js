@@ -3,6 +3,11 @@ const bcrypt = require('bcrypt');
 const sequelize = require('../config/database');
 const router = express.Router();
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> nailka
 router.get('/classes', async (req, res) => {
   try {
     const [classes] = await sequelize.query('SELECT name FROM classes');
@@ -130,6 +135,7 @@ router.post('/login', async (req, res) => {
     replacements: [email],
   });
 
+
   if (results.length === 0) {
     return res.status(404).json({ message: 'Пользователь с таким email не найден' });
   }
@@ -144,7 +150,9 @@ router.post('/login', async (req, res) => {
   req.session.user = {
     id: user.id,
     email: user.email,
-    role: user.role
+    role: user.role,
+    firstname: user.firstname, // Добавлено
+    lastname: user.lastname     // Добавлено
   };
 
   res.json({ message: 'Вход выполнен успешно' });

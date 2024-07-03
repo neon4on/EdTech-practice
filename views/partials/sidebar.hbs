@@ -2,14 +2,30 @@
   <div class="sidebar-header">
     <img src="/images/logo.svg" alt="Иконка компании">
     <span>ООО "Онлайн Платоникс"</span>
-    <button class="close-sidebar-button" onclick="closeSidebar()">✖</button>
+    <button class="close-sidebar-button" onclick="closeSidebar()">✖️</button>
   </div>
   <nav class="menu">
     <ul>
-      <li><a href="/schedule">Расписание</a></li>
-      <li><a href="/groups">Группы</a></li>
-      <li><a href="/study_plans">Учебные планы</a></li>
-      <li><a href="/class_book">Журнал</a></li> <!-- Добавленная ссылка -->
+
+      {{#if user}}
+        {{#if (eq user.role "admin")}}
+          <li><a href="/schedule">Расписание</a></li>
+          <li><a href="/groups">Группы</a></li>
+          <li><a href="/study_plans">Учебные планы</a></li>
+          <li><a href="/class_book">Журнал</a></li>
+          <li><a href="/auth/register">Регистрация</a></li>
+        {{else if (eq user.role "teacher")}}
+          <li><a href="/schedule">Расписание</a></li>
+          <li><a href="/study_plans">Учебные планы</a></li>
+          <li><a href="/class_book">Журнал</a></li>
+          <li><a href="/grade">Оценки</a></li>
+        {{else if (eq user.role "student")}}
+          <li><a href="/schedule">Расписание</a></li>
+          <li><a href="/grade">Оценки</a></li>
+        {{/if}}
+
+      {{/if}}
+
     </ul>
   </nav>
 </aside>
