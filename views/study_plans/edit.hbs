@@ -7,23 +7,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
-  <h1>Редактировать</h1>
+    <h1>Редактировать</h1>
     <div class="container">
-        
         <form id="editStudyPlanForm" action="/study_plans/edit/{{studyPlan.id}}" method="post" enctype="multipart/form-data">
             <div class="input-field">
                 <input type="text" id="title" name="title" value="{{studyPlan.title}}" required>
-                <label for="title">Название</label>
+                <label for="title" class="active">Название</label>
             </div>
             <div class="input-field">
-                <textarea id="description" name="description" class="materialize-textarea">{{studyPlan.description}}</textarea>
-                <label for="description">Описание</label>
+                <textarea id="description" name="description" class="materialize-textarea" required>{{studyPlan.description}}</textarea>
+                <label for="description" class="active">Описание</label>
             </div>
             <div class="input-field">
-                <input type="text" id="groupId" name="groupId" value="{{studyPlan.groupid}}" required>
-                <label for="groupId">ID группы</label>
+                <select id="subjectid" name="subjectid" required>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+                <label for="subjectid" class="active">Предмет</label>
             </div>
-             <label for="file">Не добавляйте файл, если не хотите его заменять</label><br>
+            <div class="input-field">
+                <select id="classid" name="classid" required>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+                <label for="classid" class="active">Класс</label>
+            </div>
             <div class="file-field input-field">
                 <div class="btn">
                     <span>Заменить файл</span>
@@ -34,16 +40,33 @@
                 </div>
             </div>
             <input type="submit" value="Сохранить" class="btn">
-            <button onclick="location.href='/study_plans'" class="btn">Вернуться назад</button>
+            <button type="button" onclick="location.href='/study_plans'" class="btn">Вернуться назад</button>
         </form>
-       
     </div>
-     
 
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
             M.updateTextFields(); // Update text fields for Materialize
+            $('select').formSelect();
 
+            // Fetch available subjects and classes
+            $.get('/study_plans/subjects', function(data) {
+                data.forEach(subject => {
+                    $('#subjectid').append(`<option value="${subject.id}">${subject.name}</option>`);
+                });
+                $('#subjectid').val('{{studyPlan.subjectid}}'); // Set the current value
+                $('select').formSelect();
+            });
+
+            $.get('/study_plans/classes', function(data) {
+                data.forEach(cls => {
+                    $('#classid').append(`<option value="${cls.id}">${cls.name}</option>`);
+                });
+                $('#classid').val('{{studyPlan.classid}}'); // Set the current value
+                $('select').formSelect();
+            });
+
+            // Handle form submission using AJAX
             // Handle form submission using AJAX
             $('#editStudyPlanForm').submit(function(e){
                 e.preventDefault();

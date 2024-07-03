@@ -8,22 +8,18 @@
 </head>
 <body>
    <h1 class="center-align">Учебные планы</h1>
-
-
     <div class="container">
-  
         <table>
             <thead>
                 <tr>
-                    <th colspan="4">
-                    </th>
+                    <th colspan="4"></th>
                 </tr>
                 <tr>
                     <th>Название</th>
                     <th>Описание</th>
-                    <th>ID группы</th>
+                    <th>Класс</th>
                     <th>Действия</th>
-                    <th><button onclick="window.location.href='/study_plans/new'" class="waves-effect waves-light btn">Создать </button></th>
+                    <th><button onclick="window.location.href='/study_plans/new'" class="waves-effect waves-light btn">Создать</button></th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +27,7 @@
                     <tr id="plan-{{this.id}}">
                         <td><a href="/study_plans/{{this.id}}">{{this.title}}</a></td>
                         <td>{{this.description}}</td>
-                        <td>{{this.groupid}}</td>
+                        <td>{{this.classname}}</td>
                         <td>
                             <a href="/study_plans/edit/{{this.id}}">Редактировать</a>
                             <a href="#" class="delete-plan" data-plan-id="{{this.id}}">Удалить</a>
