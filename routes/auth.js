@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const sequelize = require('../config/database');
 const router = express.Router();
 
+
+
 router.get('/classes', async (req, res) => {
   try {
     const [classes] = await sequelize.query('SELECT name FROM classes');
@@ -145,7 +147,9 @@ router.post('/login', async (req, res) => {
   req.session.user = {
     id: user.id,
     email: user.email,
-    role: user.role
+    role: user.role,
+    firstname: user.firstname, // Добавлено
+    lastname: user.lastname     // Добавлено
   };
 
   res.json({ message: 'Вход выполнен успешно' });
