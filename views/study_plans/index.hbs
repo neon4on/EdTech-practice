@@ -24,18 +24,34 @@
                 align-items: center;
             }
         }
+           .clickable-icon-text {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+        .clickable-icon-text i {
+            margin-right: 8px; /* Отступ между иконкой и текстом */
+        }
     </style>
 </head>
 <body>
 
 <div class="content" id="content">
-    <h1 class="center-align" style="margin: 0;">Учебные планы </h1>
+    <h1 class="center-align" style="margin: 0;" style="font-size: 30px;
+">Учебные планы </h1>
    
          
 
     <div class="container">
- <i class="medium material-icons" onclick="window.location.href='/study_plans/new'" style="cursor: pointer;">add_box</i>
-        <table>
+<h3>
+        <a href="/study_plans/new" class="clickable-icon-text" style="color: rgb(0, 0, 0); cursor: pointer;">
+            <i class="small material-icons" >add_box</i>
+            добавить
+        </a>
+    </h3>        <table>
             <thead>
                 <tr>
                     <th>Название</th>

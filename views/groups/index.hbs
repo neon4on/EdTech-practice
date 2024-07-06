@@ -25,15 +25,32 @@
                 align-items: center;
             }
         }
+          .clickable-icon-text {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+        .clickable-icon-text i {
+            margin-right: 8px; /* Отступ между иконкой и текстом */
+        }
     </style>
 </head>
 <body>
 
 <div class="content" id="content">
-    <div class="container">
     <h1 class="center-align" style="margin: 0;">Учебные группы</h1>
+    <div class="container">
     
-        <i class="medium material-icons" onclick="window.location.href='/groups/new'" style="cursor: pointer;">group_add</i>
+    
+        <h3>
+        <a href="/groups/new" class="clickable-icon-text" style="color: rgb(0, 0, 0); cursor: pointer;">
+            <i class="small material-icons" >group_add</i>
+            добавить
+        </a>
+    </h3> 
         <table>
             <thead>
                 <tr>
