@@ -1,26 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>{{title}}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<style>
+        .btn-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px; /* Промежуток между иконками */
+        }
+
+        .btn-container .material-icons {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .btn-container {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="content" id="content">
-   <h1 class="center-align">Учебные планы</h1>
+
+<div class="content" id="content">
+    <h1 class="center-align" style="margin: 0;">Учебные планы </h1>
+   
+         
+
     <div class="container">
+ <i class="medium material-icons" onclick="window.location.href='/study_plans/new'" style="cursor: pointer;">add_box</i>
         <table>
             <thead>
-                <tr>
-                    <th colspan="4"></th>
-                </tr>
                 <tr>
                     <th>Название</th>
                     <th>Описание</th>
                     <th>Класс</th>
                     <th>Действия</th>
-                    <th><button onclick="window.location.href='/study_plans/new'" class="waves-effect waves-light btn">Создать</button></th>
+                    
                 </tr>
             </thead>
             <tbody>
@@ -30,8 +52,12 @@
                         <td>{{this.description}}</td>
                         <td>{{this.classname}}</td>
                         <td>
-                            <a href="/study_plans/edit/{{this.id}}">Редактировать</a>
-                            <a href="#" class="delete-plan" data-plan-id="{{this.id}}">Удалить</a>
+                           <div class="btn-container">
+                                <a href="/study_plans/edit/{{this.id}}"><i class="material-icons" style="color: #000000; cursor: pointer;">edit</i></a>
+
+                                <a href="#" class="delete-plan" data-plan-id="{{this.id}}"><i class="material-icons" style="color: rgb(0, 0, 0); cursor: pointer;">delete</i></a>
+
+                            </div>
                         </td>
                     </tr>
                 {{/each}}
@@ -39,48 +65,55 @@
         </table>
     </div>
 </div>
-    <script>
-        $(document).ready(function(){
-            // Обработчик клика по ссылке "Удалить"
-            $('.delete-plan').click(function(e){
-                e.preventDefault();
-                var planId = $(this).data('plan-id');
-                var trElement = $(this).closest('tr'); // Получаем родительскую строку таблицы
 
-                $.ajax({
-                    url: '/study_plans/delete/' + planId,
-                    type: 'GET',
-                    success: function(data){
-                        // Успешно удаленный учебный план удаляем из DOM
-                        trElement.remove();
+<script>
+$(document).ready(function(){
+    // Обработчик клика по ссылке "Удалить"
+    $('.delete-plan').click(function(e){
+        e.preventDefault();
+        var planId = $(this).data('plan-id');
+        var trElement = $(this).closest('tr'); // Получаем родительскую строку таблицы
 
-                        // Показываем тост с сообщением об успешном удалении
-                        M.toast({html: 'Учебный план успешно удален', classes: 'rounded'});
-                    },
-                    error: function(jqXHR){
-                        var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при удалении учебного плана';
-                        M.toast({html: message, classes: 'rounded red lighten-1'});
-                    }
-                });
-            });
-        });
-         function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const header = document.getElementById('header');
-            const content = document.getElementById('content');
-            sidebar.classList.toggle('visible');
-            header.classList.toggle('sidebar-open');
-            content.classList.toggle('sidebar-open');
-        }
+        $.ajax({
+            url: '/study_plans/delete/' + planId,
+            type: 'GET',
+            success: function(data){
+                // Успешно удаленный учебный план удаляем из DOM
+                trElement.remove();
 
-            function closeSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const header = document.getElementById('header');
-            const content = document.getElementById('content');
-            sidebar.classList.remove('visible');
-            header.classList.remove('sidebar-open');
-            content.classList.remove('sidebar-open');
+                // Показываем тост с сообщением об успешном удалении
+                M.toast({html: 'Учебный план успешно удален', classes: 'rounded'});
+            },
+            error: function(jqXHR){
+                var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при удалении учебного плана';
+                M.toast({html: message, classes: 'rounded red lighten-1'});
             }
-    </script>
+        });
+    });
+});
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.getElementById('header');
+    const content = document.getElementById('content');
+    if (sidebar && header && content) {
+        sidebar.classList.toggle('visible');
+        header.classList.toggle('sidebar-open');
+        content.classList.toggle('sidebar-open');
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.getElementById('header');
+    const content = document.getElementById('content');
+    if (sidebar && header && content) {
+        sidebar.classList.remove('visible');
+        header.classList.remove('sidebar-open');
+        content.classList.remove('sidebar-open');
+    }
+}
+</script>
+
 </body>
 </html>

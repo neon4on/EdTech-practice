@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Журнал</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css"> <!-- Добавлен стиль для адаптации -->
   <style>
     .table-container {
       overflow-x: auto;
@@ -83,39 +84,39 @@
 </head>
 <body>
   <div class="content" id="content">
-  <div class="container">
-    <h1>Журнал</h1>
-    <div class="input-field">
-      <select id="subject-select" class="browser-default">
-        <option value="" disabled selected>Выберите предмет</option>
-      </select>
+    <div class="container">
+      <h1>Журнал</h1>
+      <div class="input-field">
+        <select id="subject-select" class="browser-default">
+          <option value="" disabled selected>Выберите предмет</option>
+        </select>
+      </div>
+      <div class="input-field">
+        <select id="class-select" class="browser-default" disabled>
+          <option value="" disabled selected>Выберите класс</option>
+        </select>
+      </div>
+      <div class="input-field">
+        <select id="category-select" class="browser-default" disabled>
+          <option value="" disabled selected>Выберите категорию</option>
+        </select>
+      </div>
+      <div class="table-container">
+        <table id="students-table">
+          <thead>
+            <tr id="month-row">
+              <th class="fixed" colspan="2">Ученик</th>
+            </tr>
+            <tr id="dates-row">
+              <th class="fixed">Имя</th>
+              <th class="fixed">Фамилия</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="input-field">
-      <select id="class-select" class="browser-default" disabled>
-        <option value="" disabled selected>Выберите класс</option>
-      </select>
-    </div>
-    <div class="input-field">
-      <select id="category-select" class="browser-default" disabled>
-        <option value="" disabled selected>Выберите категорию</option>
-      </select>
-    </div>
-    <div class="table-container">
-      <table id="students-table">
-        <thead>
-          <tr id="month-row">
-            <th class="fixed" colspan="2">Ученик</th>
-          </tr>
-          <tr id="dates-row">
-            <th class="fixed">Имя</th>
-            <th class="fixed">Фамилия</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-    </div>
-  </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -344,23 +345,24 @@
       });
     });
 
+    // Функции для управления боковым меню
     function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const header = document.getElementById('header');
-            const content = document.getElementById('content');
-            sidebar.classList.toggle('visible');
-            header.classList.toggle('sidebar-open');
-            content.classList.toggle('sidebar-open');
-        }
+      const sidebar = document.querySelector('.sidebar');
+      const header = document.getElementById('header');
+      const content = document.getElementById('content');
+      sidebar.classList.toggle('visible');
+      header.classList.toggle('sidebar-open');
+      content.classList.toggle('sidebar-open');
+    }
 
-            function closeSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const header = document.getElementById('header');
-            const content = document.getElementById('content');
-            sidebar.classList.remove('visible');
-            header.classList.remove('sidebar-open');
-            content.classList.remove('sidebar-open');
-            }
+    function closeSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const header = document.getElementById('header');
+      const content = document.getElementById('content');
+      sidebar.classList.remove('visible');
+      header.classList.remove('sidebar-open');
+      content.classList.remove('sidebar-open');
+    }
   </script>
 </body>
 </html>

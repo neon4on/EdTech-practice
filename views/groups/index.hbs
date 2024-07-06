@@ -1,27 +1,44 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Учебные группы</title>
-    
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <style>
+        .btn-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px; /* Промежуток между иконками */
+        }
+
+        .btn-container .material-icons {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .btn-container {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    
-    <div class="content" id="content">
-    
+
+<div class="content" id="content">
     <div class="container">
-        <h1>Учебные группы</h1>
-       
-        <button onclick="window.location.href='/groups/new'" class="waves-effect waves-light btn">Создать группу</button>
+    <h1 class="center-align" style="margin: 0;">Учебные группы</h1>
+    
+        <i class="medium material-icons" onclick="window.location.href='/groups/new'" style="cursor: pointer;">group_add</i>
         <table>
             <thead>
                 <tr>
                     <th>Название</th>
                     <th>Действия</th>
-                    <th>
-                        
-                        
-                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -29,21 +46,44 @@
                     <tr id="class-{{this.id}}">
                         <td><a href="/groups/{{this.id}}">{{this.name}}</a></td>
                         <td>
-                            <a href="/groups/{{this.id}}/edit" class="btn">Редактировать</a>
-                            <form action="/groups/{{this.id}}?_method=DELETE" method="POST" style="display:inline;">
-                                <button type="submit" class="btn">Удалить</button>
-                            </form>
+                            <div class="btn-container">
+                                <a href="/groups/{{this.id}}/edit"><i class="material-icons" style="color: #000000; cursor: pointer;">edit</i></a>
+                                <a href="#" class="delete-group" data-group-id="{{this.id}}"><i class="material-icons" style="color: rgb(2, 2, 2); cursor: pointer;">delete</i></a>
+                            </div>
                         </td>
-                  
                     </tr>
                 {{/each}}
             </tbody>
         </table>
     </div>
-    </div>
+</div>
 
-    <script>
-                    function toggleSidebar() {
+<script>
+$(document).ready(function(){
+    // Обработчик клика по иконке "Удалить"
+    $('.delete-group').click(function(e){
+        e.preventDefault();
+        var groupId = $(this).data('group-id');
+
+        $.ajax({
+            url: '/groups/' + groupId + '/delete',
+            type: 'POST', // Меняем тип запроса на POST
+            success: function(data){
+                // Успешно удаленную группу удаляем из DOM
+                $('#class-' + groupId).remove();
+
+                // Показываем тост с сообщением об успешном удалении
+                M.toast({html: 'Группа успешно удалена', classes: 'rounded'});
+            },
+            error: function(jqXHR){
+                var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при удалении группы';
+                M.toast({html: message, classes: 'rounded red lighten-1'});
+            }
+        });
+    });
+});
+
+ function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             const header = document.getElementById('header');
             const content = document.getElementById('content');
@@ -59,8 +99,8 @@
             sidebar.classList.remove('visible');
             header.classList.remove('sidebar-open');
             content.classList.remove('sidebar-open');
+            }
+</script>
 
-           
-
-        }
-    </script>
+</body>
+</html>

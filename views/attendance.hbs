@@ -1,66 +1,78 @@
-<div class="content" id="content">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Отсутствия для студента с ID {{id}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css"> <!-- Добавлен стиль для адаптации -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body>
+    
 
-<h1>Отсутствия для студента с ID {{id}}</h1>
+    <div class="content" id="content">
+        <h1>Отсутствия для студента с ID {{id}}</h1>
+        
+        <form id="attendance-form">
+            <label for="date">Дата:</label><br>
+            <input type="date" id="date" name="date"><br>
+            <label for="type">Тип:</label><br>
+            <input type="text" id="type" name="type"><br>
+            <label for="comment">Комментарий:</label><br>
+            <input type="text" id="comment" name="comment"><br>
+            <input type="submit" value="Обновить отсутствие">
+        </form>
 
-<form id="attendance-form">
-  <label for="date">Дата:</label><br>
-  <input type="date" id="date" name="date"><br>
-  <label for="type">Тип:</label><br>
-  <input type="text" id="type" name="type"><br>
-  <label for="comment">Комментарий:</label><br>
-  <input type="text" id="comment" name="comment"><br>
-  <input type="submit" value="Обновить отсутствие">
-</form>
+        <ul id="attendance-list">
+            {{#each attendance}}
+            <li>{{this.date}}: {{this.type}}, Комментарий: {{this.comment}}</li>
+            {{/each}}
+        </ul>
 
-<ul id="attendance-list">
-  {{#each attendance}}
-  <li>{{this.date}}: {{this.type}}, Комментарий: {{this.comment}}</li>
-  {{/each}}
-</ul>
+        <button onclick="loadAttendance()">Обновить список отсутствий</button>
+    </div>
 
-<button onclick="loadAttendance()">Обновить список отсутствий</button>
-</div>
-<script>
-function loadAttendance() {
-  fetch('/attendance?user_id={{id}}')
-    .then(response => response.json())
-    .then(absences => {
-      const list = document.getElementById('attendance-list');
-      list.innerHTML = '';
-      for (let absence of absences) {
-        const li = document.createElement('li');
-        li.textContent = absence.date + ': ' + absence.type + ', Комментарий: ' + absence.comment;
-        list.appendChild(li);
-      }
-    });
-}
+    <script>
+        function loadAttendance() {
+            fetch('/attendance?user_id={{id}}')
+                .then(response => response.json())
+                .then(absences => {
+                    const list = document.getElementById('attendance-list');
+                    list.innerHTML = '';
+                    for (let absence of absences) {
+                        const li = document.createElement('li');
+                        li.textContent = `${absence.date}: ${absence.type}, Комментарий: ${absence.comment}`;
+                        list.appendChild(li);
+                    }
+                });
+        }
 
-document.getElementById('attendance-form').addEventListener('submit', function(event) {
-  event.preventDefault();
-  const date = document.getElementById('date').value;
-  const type = document.getElementById('type').value;
-  const comment = document.getElementById('comment').value;
-  fetch('/attendance', {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ id: {{id}}, date, type, comment }),
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
-    loadAttendance();
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
-});
+        document.getElementById('attendance-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const date = document.getElementById('date').value;
+            const type = document.getElementById('type').value;
+            const comment = document.getElementById('comment').value;
+            fetch('/attendance', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: {{id}}, date, type, comment }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                loadAttendance();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
 
-window.onload = loadAttendance;
+        window.onload = loadAttendance;
 
-
- function toggleSidebar() {
+        // Функции для управления боковым меню
+        function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             const header = document.getElementById('header');
             const content = document.getElementById('content');
@@ -69,12 +81,23 @@ window.onload = loadAttendance;
             content.classList.toggle('sidebar-open');
         }
 
-            function closeSidebar() {
+        function closeSidebar() {
             const sidebar = document.querySelector('.sidebar');
             const header = document.getElementById('header');
             const content = document.getElementById('content');
             sidebar.classList.remove('visible');
             header.classList.remove('sidebar-open');
             content.classList.remove('sidebar-open');
+        }
+
+        // Обновление стилей при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 600) {
+                document.getElementById('content').classList.add('mobile-view');
             }
-</script>
+        });
+
+        // Дополнительные функции и события для адаптации могут быть добавлены по необходимости
+    </script>
+</body>
+</html>
