@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Просмотр домашних заданий</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Просмотр домашних заданий</h1>
+    <div class="input-field">
+      <select id="subject-select" class="browser-default">
+        <option value="" disabled selected>Выберите предмет</option>
+      </select>
+    </div>
+    <div class="input-field">
+      <select id="class-select" class="browser-default" disabled>
+        <option value="" disabled selected>Выберите класс</option>
+      </select>
+    </div>
+    <div id="homework-container" style="display: none;">
+      <h3>Домашние задания</h3>
+      <ul id="homework-list" class="collection"></ul>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      function loadSubjects() {
+        $.get('/homework/subjects')
+          .done(function(data) {
+            const subjectSelect = $('#subject-select');
+            subjectSelect.empty().append('<option value="" disabled selected>Выберите предмет</option>');
+            data.forEach(function(subject) {
+              subjectSelect.append(`<option value="${subject.id}">${subject.name}</option>`);
+            });
+            subjectSelect.formSelect();
+          })
+          .fail(function(xhr) {
+            console.error('Ошибка загрузки предметов:', xhr);
+          });
+      }
+
+      function loadClasses() {
+        $.get('/homework/classes')
+          .done(function(data) {
+            const classSelect = $('#class-select');
+            classSelect.empty().append('<option value="" disabled selected>Выберите класс</option>');
+            data.forEach(function(cls) {
+              classSelect.append(`<option value="${cls.id}">${cls.name}</option>`);
+            });
+            classSelect.prop('disabled', false).formSelect();
+          })
+          .fail(function(xhr) {
+            console.error('Ошибка загрузки классов:', xhr);
+          });
+      }
+
+      function loadHomework() {
+        const subjectId = $('#subject-select').val();
+        const classId = $('#class-select').val();
+
+        if (subjectId && classId) {
+          $.get('/homework/schedule', { subjectId, classId })
+            .done(function(scheduleData) {
+              const homeworkList = $('#homework-list');
+              homeworkList.empty();
+
+              scheduleData.forEach(function(lesson) {
+                const listItem = $(`<li class="collection-item">${lesson.fullDate}</li>`);
+                const homeworkButton = $('<button class="btn waves-effect waves-light">Показать ДЗ</button>');
+                homeworkButton.click(function() {
+                  showHomework(subjectId, classId, lesson.fullDate);
+                });
+                listItem.append(homeworkButton);
+                homeworkList.append(listItem);
+              });
+
+              $('#homework-container').show();
+            })
+            .fail(function(xhr) {
+              console.error('Ошибка загрузки расписания:', xhr);
+            });
+        }
+      }
+
+      function showHomework(subjectId, classId, date) {
+        $.get('/homework/get_homework', { subjectId, classId, date })
+          .done(function(data) {
+            if (data.homework_text) {
+              alert(`Домашнее задание: ${data.homework_text}`);
+              if (data.attachment_filename) {
+                const downloadLink = $('<a>').attr({
+                  href: `/homework/download_homework_file?subjectId=${subjectId}&classId=${classId}&date=${date}`,
+                  download: data.attachment_filename
+                }).text('Скачать файл');
+                $('#homework-container').append(downloadLink);
+              }
+            } else {
+              alert('Домашнее задание не найдено');
+            }
+          })
+          .fail(function(xhr) {
+            console.error('Ошибка загрузки домашнего задания:', xhr);
+          });
+      }
+
+      loadSubjects();
+
+      $('#subject-select').change(function() {
+        loadClasses();
+      });
+
+      $('#class-select').change(function() {
+        loadHomework();
+      });
+    });
+  </script>
+</body>
+</html>
