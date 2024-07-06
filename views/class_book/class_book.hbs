@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h1>{{title}}</h1>
+
+  {{!-- <h2>Учебный план</h2> --}}
+  <p>ФИО преподавателя: {{teacher}}</p>
+  <p>Предмет: {{subject}}</p>
+  <p>Класс: {{classInfo}}</p>
+
+  <h2>Соответствующее расписание</h2>
+  {{#if scheduleResults.length}}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Дата</th>
+          <th>День недели</th>
+          <th>Время начала</th>
+          <th>Время окончания</th>
+          <th>ФИО студента</th>
+          <th>Класс</th>
+          <th>Предмет</th>
+          <th>Преподаватель</th>
+          <th>Кабинет</th>
+          <th>Тема</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each scheduleResults}}
+          <tr>
+            <td>{{this.id}}</td>
+            <td>{{this.date}}</td>
+            <td>{{this.week}}</td>
+            <td>{{this.start}}</td>
+            <td>{{this.ends}}</td>
+            <td>{{this.stdfio}}</td>
+            <td>{{this.class}}</td>
+            <td>{{this.subj}}</td>
+            <td>{{this.teacher}}</td>
+            <td>{{this.kabs}}</td>
+            <td>{{this.topic}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
+    <p>Записи не найдены.</p>
+  {{/if}}
+</body>
+</html>

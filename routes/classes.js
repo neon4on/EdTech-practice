@@ -49,7 +49,7 @@ router.get('/table', async (req, res) => {
 
     try {
         let usersQuery = `
-            SELECT c.name AS class_name, u.firstname, u.lastname, a.type, a.date_from, a.date_to, a.comment
+            SELECT c.name AS class_name, u.id AS user_id, u.firstname, u.lastname, a.type, a.date_from, a.date_to, a.comment
             FROM users u
             JOIN user_classes uc ON u.id = uc.user_id
             JOIN classes c ON uc.class_id = c.id
@@ -88,36 +88,34 @@ router.get('/table', async (req, res) => {
 });
 
 // Добавление маршрута для удаления записи о посещаемости
-// Маршрут для удаления записи о посещаемости
 router.post('/delete-attendance', async (req, res) => {
     try {
-        const { attendanceId } = req.body;
+        const { userId, dateFrom, dateTo } = req.body;
 
-        if (!attendanceId) {
-            return res.status(400).json({ error: 'Не указан attendanceId' });
+        if (!userId || !dateFrom || !dateTo) {
+            return res.status(400).json({ error: 'Не указаны все необходимые параметры' });
         }
 
         const deleteQuery = `
             DELETE FROM attendance
-            WHERE id = :attendanceId
+            WHERE user_id = :userId AND date_from = :dateFrom AND date_to = :dateTo
         `;
 
         const result = await sequelize.query(deleteQuery, {
-            replacements: { attendanceId },
+            replacements: { userId, dateFrom, dateTo },
             type: QueryTypes.DELETE
         });
 
-        console.log('Результат удаления:', result);
+        console.log('Delete result:', result);
 
         res.json({ message: 'Запись о посещаемости успешно удалена' });
     } catch (error) {
-        console.error('Ошибка при удалении посещаемости:', error);
+        console.error('Error deleting attendance:', error);
         res.status(500).json({ error: 'Ошибка при удалении записи о посещаемости' });
     }
 });
 
-
-
+// Обработчик сохранения записи о посещаемости
 router.post('/save-attendance', async (req, res) => {
     console.log('Получен запрос на сохранение посещаемости');
 
@@ -135,6 +133,24 @@ router.post('/save-attendance', async (req, res) => {
         if (!userId || !dateFrom || !dateTo || !attendanceType) {
             console.log('Ошибка: Не все обязательные поля заполнены');
             return res.status(400).json({ error: 'Пожалуйста, заполните все поля!' });
+        }
+
+        // Проверяем, есть ли уже запись о посещаемости для этого ученика и указанных дат
+        const existingAttendanceQuery = `
+            SELECT id
+            FROM attendance
+            WHERE user_id = :userId
+            AND date_from = :dateFrom
+            AND date_to = :dateTo
+        `;
+        const existingAttendance = await sequelize.query(existingAttendanceQuery, {
+            replacements: { userId, dateFrom, dateTo },
+            type: QueryTypes.SELECT
+        });
+
+        if (existingAttendance.length > 0) {
+            console.log('Ошибка: Запись о посещаемости уже существует для указанных дат');
+            return res.status(400).json({ error: 'Запись о посещаемости уже существует для указанных дат' });
         }
 
         console.log('SQL-запрос:', 'INSERT INTO attendance (user_id, date_from, date_to, type, comment) VALUES (?, ?, ?, ?, ?)',

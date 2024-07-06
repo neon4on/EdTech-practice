@@ -11,12 +11,8 @@ const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
 const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
 const indexRoutes = require('./routes/index');
-<<<<<<< HEAD
 const attendanceRoutes = require('./routes/classes');
 
-=======
-const attendanceRoutes = require('./routes/attendance');
->>>>>>> 44ae37f5e21b0984ee6d7842d7ba1d7f6f830463
 const app = express();
 
 const hbs = exphbs.create({

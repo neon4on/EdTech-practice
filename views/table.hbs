@@ -45,7 +45,7 @@
                     <td>{{this.date_to}}</td>
                     <td>{{this.comment}}</td>
                     <td>
-                        <button class="btn waves-effect waves-light red delete-btn" data-user-id="{{this.user_id}}" data-attendance-id="{{this.attendance_id}}">Удалить</button>
+                        <button class="btn waves-effect waves-light red delete-btn" data-user-id="{{this.user_id}}" data-date-from="{{this.date_from}}" data-date-to="{{this.date_to}}">Удалить</button>
                     </td>
                 </tr>
                 {{/each}}
@@ -73,22 +73,27 @@
             // Обработчик клика на кнопку удаления
             $(document).on('click', '.delete-btn', function() {
                 var userId = $(this).data('user-id');
-                var attendanceId = $(this).data('attendance-id');
+                var dateFrom = $(this).data('date-from');
+                var dateTo = $(this).data('date-to');
+
+                console.log('Delete button clicked, userId:', userId, 'dateFrom:', dateFrom, 'dateTo:', dateTo);
 
                 if (confirm('Вы уверены, что хотите удалить запись о посещаемости?')) {
                     $.ajax({
                         url: '/classes/delete-attendance',
                         method: 'POST',
                         contentType: 'application/json',
-                        data: JSON.stringify({ attendanceId }),
+                        data: JSON.stringify({ userId: userId, dateFrom: dateFrom, dateTo: dateTo }),
                         success: function(response) {
                             console.log('Delete response:', response);
                             // Обновляем страницу после успешного удаления
                             location.reload();
                         },
-                        error: function(error) {
+                        error: function(xhr, status, error) {
                             console.error('Error:', error);
-                            alert('Ошибка при удалении записи о посещаемости');
+                            console.log('XHR:', xhr);
+                            console.log('Status:', status);
+                            alert('Ошибка при удалении записи о посещаемости: ' + xhr.responseText);
                         }
                     });
                 }
