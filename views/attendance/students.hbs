@@ -1,0 +1,24 @@
+<ul>
+  {{#each students}}
+    <li>
+      <strong>{{this.firstname}} {{this.lastname}}</strong>
+      <ul>
+        {{#each ../attendance.[this.id]}} <!-- Исправлено -->
+          <li>Дата: {{this.date}}, Тип: {{this.type}}, Комментарий: {{this.comment}}</li>
+        {{/each}}
+      </ul>
+      <form action="/students/{{this.id}}/attendance" method="POST">
+        <label for="type">Тип отсутствия:</label>
+        <input type="text" id="type" name="type" required><br>
+
+        <label for="date">Дата:</label>
+        <input type="text" id="date" name="date" required><br>
+
+        <label for="comment">Комментарий:</label>
+        <input type="text" id="comment" name="comment"><br>
+
+        <button type="submit">Сохранить</button>
+      </form>
+    </li>
+  {{/each}}
+</ul>

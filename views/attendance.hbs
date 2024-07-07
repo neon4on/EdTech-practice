@@ -4,14 +4,12 @@
     <title>Отсутствия для студента с ID {{id}}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css"> <!-- Добавлен стиль для адаптации -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
-    
 
-    <div class="content" id="content">
-        <h1>Отсутствия для студента с ID {{id}}</h1>
+<div class="content" id="content">
+
+<h1>Отсутствия для студента с ID {{id}}</h1>
         
         <form id="attendance-form">
             <label for="date">Дата:</label><br>
@@ -30,8 +28,45 @@
         </ul>
 
         <button onclick="loadAttendance()">Обновить список отсутствий</button>
-    </div>
+   
 
+    <div class="container">
+        <h1 class="center-align">{{title}}</h1>
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Тип</th>
+                    <th>Дата от</th>
+                    <th>Дата до</th>
+                    <th>Комментарий</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each attendance}}
+                <tr>
+                    <td>{{this.firstname}}</td>
+                    <td>{{this.lastname}}</td>
+                    <td>{{this.type}}</td>
+                    <td>{{this.date_from}}</td>
+                    <td>{{this.date_to}}</td>
+                    <td>{{this.comment}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <button id="back-to-classes" class="btn waves-effect waves-light">Назад к классам</button>
+    </div>
+ </div>
+   
+
+</body>
+</html>
+
+
+
+        
     <script>
         function loadAttendance() {
             fetch('/attendance?user_id={{id}}')
@@ -95,9 +130,5 @@
             if (window.innerWidth <= 600) {
                 document.getElementById('content').classList.add('mobile-view');
             }
-        });
+</script>
 
-        // Дополнительные функции и события для адаптации могут быть добавлены по необходимости
-    </script>
-</body>
-</html>
