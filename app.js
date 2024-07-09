@@ -12,7 +12,7 @@ const studyplanRoutes = require('./routes/study_plan');
 const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
 const indexRoutes = require('./routes/index');
 const attendanceRoutes = require('./routes/classes');
-
+const homeworkList = require('./routes/homework');
 const app = express();
 
 const hbs = exphbs.create({
@@ -93,6 +93,13 @@ app.use('/class_book', (req, res, next) => {
   }
   next();
 }, classBookRoutes);
+
+app.use('/homework', (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/auth/login');
+  }
+  next();
+}, homeworkList);
 
 app.use('/auth', authRouter);
 

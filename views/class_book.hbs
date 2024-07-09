@@ -82,7 +82,6 @@
   </style>
 </head>
 <body>
-  <div class="content" id="content">
   <div class="container">
     <h1>Журнал</h1>
     <div class="input-field">
@@ -116,252 +115,364 @@
       </table>
     </div>
   </div>
+<div id="edit-topic-modal" class="modal">
+  <div class="modal-content">
+    <h4>Редактировать тему урока и домашнее задание</h4>
+    <input type="text" id="topic-input" placeholder="Введите тему урока">
+    <textarea id="homework-input" placeholder="Введите домашнее задание"></textarea>
+    <div class="file-field input-field">
+      <div class="btn">
+        <span>Файл</span>
+        <input type="file" id="homework-file">
+      </div>
+      <div class="file-path-wrapper">
+        <input class="file-path validate" type="text" placeholder="Загрузить файл">
+      </div>
+    </div>
   </div>
-
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Отмена</a>
+    <a href="#!" id="save-topic" class="waves-effect waves-green btn">Сохранить</a>
+  </div>
+</div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script>
-    
-    $(document).ready(function() {
-      let studyPlanTopics = [];
+$(document).ready(function() {
+  $('.modal').modal();
 
-      function loadStudyPlanTopics(subjectId, classId) {
-        return $.get(`/class_book/study_plan`, { subjectId: subjectId, classId: classId })
-          .done(function(data) {
-            studyPlanTopics = data.topics;
-            console.log('Темы учебного плана загружены:', studyPlanTopics);
-          })
-          .fail(function(xhr) {
-            console.error('Ошибка загрузки тем учебного плана:', xhr);
+  function loadStudyPlanTopics(subjectId, classId) {
+    return $.get(`/class_book/study_plan`, { subjectId: subjectId, classId: classId })
+      .done(function(data) {
+        studyPlanTopics = data.topics;
+      })
+      .fail(function(xhr) {
+        alert('Ошибка загрузки тем учебного плана. Пожалуйста, попробуйте еще раз.');
+      });
+  }
+
+  function loadSubjects() {
+    $.get('/class_book/subjects')
+      .done(function(data) {
+        const subjectSelect = $('#subject-select');
+        subjectSelect.empty().append('<option value="" disabled selected>Выберите предмет</option>');
+        data.forEach(function(subject) {
+          subjectSelect.append(`<option value="${subject.id}">${subject.name}</option>`);
+        });
+        subjectSelect.formSelect();
+      })
+      .fail(function(xhr) {
+        console.error('Ошибка загрузки предметов:', xhr);
+      });
+  }
+
+  function loadClasses() {
+    $.get('/class_book/classes')
+      .done(function(data) {
+        const classSelect = $('#class-select');
+        classSelect.empty().append('<option value="" disabled selected>Выберите класс</option>');
+        data.forEach(function(cls) {
+          classSelect.append(`<option value="${cls.id}">${cls.name}</option>`);
+        });
+        classSelect.prop('disabled', false).formSelect();
+      })
+      .fail(function(xhr) {
+        console.error('Ошибка загрузки классов:', xhr);
+      });
+  }
+
+  function loadGradeWeights() {
+    $.get('/class_book/grade_weights')
+      .done(function(data) {
+        const categorySelect = $('#category-select');
+        categorySelect.empty().append('<option value="" disabled selected>Выберите категорию</option>');
+        data.forEach(function(category) {
+          categorySelect.append(`<option value="${category.category}" data-weight="${category.weight}">${category.category}</option>`);
+        });
+        categorySelect.prop('disabled', false).formSelect();
+      })
+      .fail(function(xhr) {
+        console.error('Ошибка загрузки категорий:', xhr);
+      });
+  }
+
+  function loadExistingGrades() {
+    const classId = $('#class-select').val();
+    const subjectId = $('#subject-select').val();
+    const category = $('#category-select').val();
+
+    if (classId && subjectId && category) {
+      $.get('/class_book/existing-grades', { classId: classId, subjectId: subjectId, category: category })
+        .done(function(data) {
+          data.forEach(function(grade) {
+            const input = $(`input[data-student-id="${grade.student_id}"][data-date="${grade.date}"][data-category="${category}"]`);
+            if (input.length) {
+              input.val(grade.grade);
+            }
           });
-      }
+        })
+        .fail(function(xhr) {
+          console.error('Ошибка загрузки существующих оценок:', xhr);
+        });
+    }
+  }
 
-      function loadSubjects() {
-        console.log('Loading subjects...');
-        $.get('/class_book/subjects')
-          .done(function(data) {
-            console.log('Subjects ', data);
-            const subjectSelect = $('#subject-select');
-            subjectSelect.empty().append('<option value="" disabled selected>Выберите предмет</option>');
-            data.forEach(function(subject) {
-              subjectSelect.append(`<option value="${subject.id}">${subject.name}</option>`);
-            });
-            subjectSelect.formSelect();
-            console.log('Subjects loaded successfully');
-          })
-          .fail(function(xhr) {
-            console.error('Ошибка загрузки предметов:', xhr);
-          });
-      }
+  function loadAttendance(classId, startDate, endDate) {
+    return $.get('/class_book/attendance', { classId, startDate, endDate })
+      .done(function(data) {
+        return data;
+      })
+      .fail(function(xhr) {
+        console.error('Ошибка загрузки данных о пропусках:', xhr);
+        return [];
+      });
+  }
 
-      function loadClasses() {
-        console.log('Loading classes...');
-        $.get('/class_book/classes')
-          .done(function(data) {
-            console.log('Classes ', data);
-            const classSelect = $('#class-select');
-            classSelect.empty().append('<option value="" disabled selected>Выберите класс</option>');
-            data.forEach(function(cls) {
-              classSelect.append(`<option value="${cls.id}">${cls.name}</option>`);
-            });
-            classSelect.prop('disabled', false).formSelect();
-            console.log('Classes loaded successfully');
-          })
-          .fail(function(xhr) {
-            console.error('Ошибка загрузки классов:', xhr);
-          });
-      }
+  function loadStudentsAndSchedule() {
+    const classId = $('#class-select').val();
+    const subjectId = $('#subject-select').val();
+    const category = $('#category-select').val();
 
-      function loadGradeWeights() {
-        console.log('Loading grade weights...');
-        $.get('/class_book/grade_weights')
-          .done(function(data) {
-            console.log('Grade weights ', data);
-            const categorySelect = $('#category-select');
-            categorySelect.empty().append('<option value="" disabled selected>Выберите категорию</option>');
-            data.forEach(function(category) {
-              categorySelect.append(`<option value="${category.category}" data-weight="${category.weight}">${category.category}</option>`);
-            });
-            categorySelect.prop('disabled', false).formSelect();
-            console.log('Grade weights loaded successfully');
-          })
-          .fail(function(xhr) {
-            console.error('Ошибка загрузки категорий:', xhr);
-          });
-      }
+    if (classId && subjectId && category) {
+      $.get('/class_book/students', { classId: classId })
+        .done(function(studentsData) {
+          $.get('/class_book/schedule', { subjectId: subjectId, classId: classId })
+            .done(function(scheduleData) {
+              const tableBody = $('#students-table tbody');
+              const datesRow = $('#dates-row');
+              const monthRow = $('#month-row');
 
-      function loadExistingGrades() {
-        const classId = $('#class-select').val();
-        const subjectId = $('#subject-select').val();
-        const category = $('#category-select').val();
+              tableBody.empty();
+              datesRow.find('th:not(.fixed)').remove();
+              monthRow.find('th:not(.fixed)').remove();
 
-        if (classId && subjectId && category) {
-          $.get('/class_book/existing-grades', { classId: classId, subjectId: subjectId, category: category })
-            .done(function(data) {
-              data.forEach(function(grade) {
-                const input = $(`input[data-student-id="${grade.student_id}"][data-date="${grade.date}"][data-category="${category}"]`);
-                if (input.length) {
-                  input.val(grade.grade);
-                }
+              loadStudyPlanTopics(subjectId, classId).then(function() {
+                scheduleData.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
+
+                const monthGroups = scheduleData.reduce((groups, item) => {
+                  const date = new Date(item.fullDate);
+                  const month = date.toLocaleString('ru', { month: 'long' });
+                  if (!groups[month]) {
+                    groups[month] = [];
+                  }
+                  groups[month].push(item);
+                  return groups;
+                }, {});
+
+                let topicIndex = 0;
+
+                Object.entries(monthGroups).forEach(([month, dates]) => {
+                  monthRow.append(`<th colspan="${dates.length}">${month}</th>`);
+                  dates.forEach(date => {
+                    const dateObj = new Date(date.fullDate);
+                    const day = dateObj.getDate();
+                    const weekDay = dateObj.toLocaleString('ru', { weekday: 'short' });
+                    const topic = studyPlanTopics[topicIndex] || 'Тема отсутствует';
+                    datesRow.append(`
+                      <th class="tooltip date-column" data-date="${date.fullDate}">
+                        ${day} ${weekDay}
+                        <span class="tooltiptext">Тема: ${topic}</span>
+                      </th>
+                    `);
+                    topicIndex++;
+                  });
+                });
+
+                const startDate = scheduleData[0].fullDate;
+                const endDate = scheduleData[scheduleData.length - 1].fullDate;
+
+                loadAttendance(classId, startDate, endDate).then(function(attendanceData) {
+                  studentsData.forEach(function(student) {
+                    let row = `<tr data-student-id="${student.id}">
+                                <td class="fixed">${student.firstname}</td>
+                                <td class="fixed">${student.lastname}</td>`;
+
+                    scheduleData.forEach(function(date) {
+                      const absence = attendanceData.find(a => 
+                        a.user_id === student.id && 
+                        new Date(date.fullDate) >= new Date(a.date_from) && 
+                        new Date(date.fullDate) <= new Date(a.date_to)
+                      );
+
+                      if (absence) {
+                      row += `<td>
+                                <input type="number" min="2" max="5" 
+                                  data-student-id="${student.id}" 
+                                  data-date="${date.fullDate}" 
+                                  data-category="${category}" 
+                                  data-weight="${$('#category-select option:selected').data('weight')}">
+                                <span class="absence-reason">${absence.type}</span>
+                              </td>`;
+                    } else {
+                      row += `<td>
+                                <input type="number" min="2" max="5" 
+                                  data-student-id="${student.id}" 
+                                  data-date="${date.fullDate}" 
+                                  data-category="${category}" 
+                                  data-weight="${$('#category-select option:selected').data('weight')}">
+                              </td>`;
+                    }
+                    });
+
+                    row += '</tr>';
+                    tableBody.append(row);
+                  });
+
+                  loadExistingGrades();
+                });
               });
             })
             .fail(function(xhr) {
-              console.error('Ошибка загрузки существующих оценок:', xhr);
+              console.error('Ошибка загрузки расписания:', xhr);
             });
-        }
-      }
-
-      function loadStudentsAndSchedule() {
-        const classId = $('#class-select').val();
-        const subjectId = $('#subject-select').val();
-        const category = $('#category-select').val();
-
-        if (classId && subjectId && category) {
-          $.get('/class_book/students', { classId: classId })
-            .done(function(studentsData) {
-              $.get('/class_book/schedule', { subjectId: subjectId, classId: classId })
-                .done(function(scheduleData) {
-                  const tableBody = $('#students-table tbody');
-                  const datesRow = $('#dates-row');
-                  const monthRow = $('#month-row');
-
-                  tableBody.empty();
-                  datesRow.find('th:not(.fixed)').remove();
-                  monthRow.find('th:not(.fixed)').remove();
-
-                  loadStudyPlanTopics(subjectId, classId).then(function() {
-                    scheduleData.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
-
-                    const monthGroups = scheduleData.reduce((groups, item) => {
-                      const date = new Date(item.fullDate);
-                      const month = date.toLocaleString('ru', { month: 'long' });
-                      if (!groups[month]) {
-                        groups[month] = [];
-                      }
-                      groups[month].push(item);
-                      return groups;
-                    }, {});
-
-                    let topicIndex = 0;
-
-                    Object.entries(monthGroups).forEach(([month, dates]) => {
-                      monthRow.append(`<th colspan="${dates.length}">${month}</th>`);
-                      dates.forEach(date => {
-                        const dateObj = new Date(date.fullDate);
-                        const day = dateObj.getDate();
-                        const weekDay = dateObj.toLocaleString('ru', { weekday: 'short' });
-                        const topic = studyPlanTopics[topicIndex] || 'Тема отсутствует';
-                        datesRow.append(`
-                          <th class="tooltip date-column" data-date="${date.fullDate}">
-                            ${day} ${weekDay}
-                            <span class="tooltiptext">Тема: ${topic}</span>
-                          </th>
-                        `);
-                        topicIndex++;
-                      });
-                    });
-
-                    studentsData.forEach(function(student) {
-                      let row = `<tr data-student-id="${student.id}">
-                                   <td class="fixed">${student.firstname}</td>
-                                   <td class="fixed">${student.lastname}</td>`;
-
-                      scheduleData.forEach(function(date) {
-                        row += `<td>
-                                  <input type="number" min="2" max="5" 
-                                    data-student-id="${student.id}" 
-                                    data-date="${date.fullDate}" 
-                                    data-category="${category}" 
-                                    data-weight="${$('#category-select option:selected').data('weight')}">
-                                </td>`;
-                      });
-
-                      row += '</tr>';
-                      tableBody.append(row);
-                    });
-
-                    loadExistingGrades();
-                  });
-                })
-                .fail(function(xhr) {
-                  console.error('Ошибка загрузки расписания:', xhr);
-                });
-            })
-            .fail(function(xhr) {
-              console.error('Ошибка загрузки учеников:', xhr);
-            });
-        }
-      }
-
-      loadSubjects();
-
-      $('#subject-select').change(function() {
-        console.log('Subject changed');
-        loadClasses();
-        loadGradeWeights();
-      });
-
-      $('#class-select, #category-select').change(function() {
-        console.log('Class or category changed');
-        loadStudentsAndSchedule();
-      });
-
-      $('#students-table').on('focus', 'input[type="number"]', function() {
-        $(this).attr('data-previous-value', $(this).val());
-      });
-
-      $('#students-table').on('change', 'input[type="number"]', function() {
-        const input = $(this);
-        const data = {
-          studentId: input.data('student-id'),
-          classId: $('#class-select').val(),
-          subjectId: $('#subject-select').val(),
-          date: input.data('date'),
-          category: input.data('category'),
-          weight: input.data('weight'),
-          grade: input.val()
-        };
-
-        console.log('Saving grade:', data);
-
-        if (!data.studentId) {
-          console.error('student_id is undefined');
-          return;
-        }
-
-        $.ajax({
-          url: '/class_book/grade',
-          method: 'POST',
-           data,
-          success: function() {
-            console.log('Grade saved successfully');
-            input.attr('data-previous-value', data.grade);
-          },
-          error: function(xhr) {
-            console.error('Ошибка сохранения оценки:', xhr);
-            input.val(input.attr('data-previous-value') || '');
-          }
+        })
+        .fail(function(xhr) {
+          console.error('Ошибка загрузки учеников:', xhr);
         });
-      });
-    });
+    }
+  }
 
-    function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const header = document.getElementById('header');
-            const content = document.getElementById('content');
-            sidebar.classList.toggle('visible');
-            header.classList.toggle('sidebar-open');
-            content.classList.toggle('sidebar-open');
-        }
 
-            function closeSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const header = document.getElementById('header');
-            const content = document.getElementById('content');
-            sidebar.classList.remove('visible');
-            header.classList.remove('sidebar-open');
-            content.classList.remove('sidebar-open');
+function updateTopic(date, newTopic, topicIndex, homework) {
+  const subjectId = $('#subject-select').val();
+  const classId = $('#class-select').val();
+  const originalTopic = studyPlanTopics[topicIndex];
+
+  // Получаем файл для загрузки
+  const homeworkFile = document.getElementById('homework-file').files[0]; // Получаем первый выбранный файл
+
+  // Создаем объект FormData для передачи данных на сервер
+  const formData = new FormData();
+  formData.append('subjectId', subjectId);
+  formData.append('classId', classId);
+  formData.append('date', date);
+  formData.append('newTopic', newTopic);
+  formData.append('originalTopic', originalTopic);
+  formData.append('topicIndex', topicIndex);
+  formData.append('homework', homework);
+
+  // Добавляем файл к FormData, если он был выбран
+  if (homeworkFile) {
+    formData.append('homeworkFile', homeworkFile);
+  }
+
+  $.ajax({
+    url: '/class_book/update_topic',
+    method: 'POST',
+    data: formData,
+    processData: false, // Обязательно для работы с FormData
+    contentType: false, // Также обязательно для работы с FormData
+    success: function(response) {
+      console.log('Topic and homework updated successfully');
+      $('.date-column[data-date="' + date + '"] .tooltiptext').text('Тема: ' + newTopic);
+      studyPlanTopics[topicIndex] = newTopic;
+      saveStudyPlanTopics();
+    },
+    error: function(xhr, status, error) {
+      console.error('Ошибка обновления темы и домашнего задания:', xhr.responseText);
+      alert('Не удалось обновить тему и домашнее задание. Пожалуйста, попробуйте еще раз.');
+    }
+  });
+}
+
+
+
+
+
+
+  loadSubjects();
+
+  $('#subject-select').change(function() {
+    loadClasses();
+    loadGradeWeights();
+  });
+
+  $('#class-select, #category-select').change(function() {
+    loadStudentsAndSchedule();
+  });
+
+  $('#students-table').on('focus', 'input[type="number"]', function() {
+    $(this).attr('data-previous-value', $(this).val());
+  });
+
+  $('#students-table').on('change', 'input[type="number"]', function() {
+    const $this = $(this);
+    const studentId = $this.data('student-id');
+    const date = $this.data('date');
+    const category = $this.data('category');
+    const grade = $this.val().trim();
+    const weight = $this.data('weight');
+    const previousValue = $this.attr('data-previous-value');
+    const classId = $('#class-select').val();
+    const subjectId = $('#subject-select').val();
+
+    let url, method, data;
+
+    if (grade === "") {
+        url = '/class_book/delete-grade';
+        method = 'DELETE';
+        data = {
+            studentId: studentId,
+            classId: classId,
+            subjectId: subjectId,
+            date: date,
+            category: category
+        };
+    } else if (grade !== previousValue) {
+        url = '/class_book/save-grade';
+        method = 'POST';
+        data = {
+            studentId: studentId,
+            classId: classId,
+            subjectId: subjectId,
+            date: date,
+            category: category,
+            grade: grade,
+            weight: weight
+        };
+    } else {
+        return;
+    }
+
+    $.ajax({
+        url: url,
+        method: method,
+        data,
+        success: function(response) {
+            if (grade === "") {
+                $this.val('');
+                console.log('Grade deleted successfully');
+            } else {
+                console.log('Grade saved successfully');
             }
+            $this.attr('data-previous-value', grade);
+        },
+        error: function(xhr, status, error) {
+            alert('Не удалось обработать оценку. Пожалуйста, попробуйте еще раз.');
+            $this.val(previousValue);
+        }
+    });
+  });
+
+  $('#students-table').on('click', '.date-column', function() {
+    currentDate = $(this).data('date');
+    currentTopicIndex = $(this).index() - 2;
+    const currentTopic = studyPlanTopics[currentTopicIndex] || 'Тема отсутствует';
+
+    $('#topic-input').val(currentTopic);
+    $('#homework-input').val('');
+    $('#homework-file').val('');
+    $('#edit-topic-modal').modal('open');
+  });
+
+  // Добавляем вызов функции updateTopic с необходимыми параметрами
+$('#save-topic').off('click').on('click', function() {
+  const newTopic = $('#topic-input').val().trim();
+  const homework = $('#homework-input').val().trim();
+  updateTopic(currentDate, newTopic, currentTopicIndex, homework);
+  $('#edit-topic-modal').modal('close');
+});
+});
   </script>
 </body>
 </html>
