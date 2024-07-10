@@ -5,144 +5,158 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Регистрация</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css">
 </head>
 <body>
 
-<div class="container">
-  <h1>Регистрация</h1>
-  <form id='register-form' action='/auth/register' method='POST'>
-    <div class="input-field">
-      <label for='firstName'>Имя:</label>
-      <input type='text' id='firstName' name='firstName' required />
-    </div>
-    <div class="input-field">
-      <label for='lastName'>Фамилия:</label>
-      <input type='text' id='lastName' name='lastName' required />
-    </div>
-    <div class="input-field">
-      <label for='email'>Email:</label>
-      <input type='email' id='email' name='email' required />
-    </div>
-    <div class="input-field">
-      <label for='password'>Пароль:</label>
-      <input type='password' id='password' name='password' required />
-    </div>
-    <div class="input-field">
-      <div><label for='role'>Роль:</label></div>
-      <select id='role' name='role' class="browser-default" required>
-        <option value='' disabled selected></option>
-        <option value='student'>Студент</option>
-        <option value='teacher'>Преподаватель</option>
-        <option value='method'>Методист</option>
-        <option value='admin'>Администратор</option>
-      </select>
-    </div>
-
- <div id='subjects-container' style='display: none;'>
-  <label for='subject-select'>Выберите предмет(ы):</label>
-  <select id='subject-select' name='subjects[]' class="browser-default" >
-    <option value='' >Выберите предмет(ы)</option>
-    <!-- Предметы будут загружены через JS -->
-  </select>
-</div>
-
-
-    <div id='classes-container' style='display: none;'>
-      <label for='class-select'>Выберите класс:</label>
-      <select id='class-select' name='class' class="browser-default">
-        <option value=''>Выберите класс</option>
-        <!-- Классы будут загружены через JS -->
-      </select>
-      {{!-- <label for='new-class'>Или введите новый класс:</label>
-      <input type='text' id='new-class' name='newClass' /> --}}
-    </div>
-
-    <button type='submit' class="btn">Зарегистрироваться</button>
-  </form>
+<div class="content" id="content">
+  <div class="container">
+    
+    <form id='register-form' action='/auth/register' method='POST'>
+      <h3>Регистрация</h3>
+      <div class="input-field">
+        <label for='firstName'>Имя:</label>
+        <input type='text' id='firstName' name='firstName' required />
+      </div>
+      <div class="input-field">
+        <label for='lastName'>Фамилия:</label>
+        <input type='text' id='lastName' name='lastName' required />
+      </div>
+      <div class="input-field">
+        <label for='email'>Email:</label>
+        <input type='email' id='email' name='email' required />
+      </div>
+      <div class="input-field">
+        <label for='password'>Пароль:</label>
+        <input type='password' id='password' name='password' required />
+      </div>
+      <div class="input-field">
+        <div><label for='role'>Роль:</label></div>
+        <select id='role' name='role' class="browser-default" required>
+          <option value='' disabled selected></option>
+          <option value='student'>Студент</option>
+          <option value='teacher'>Преподаватель</option>
+          <option value='method'>Методист</option>
+          <option value='admin'>Администратор</option>
+        </select>
+      </div>
+      <div id='subjects-container' style='display: none;'>
+        <label for='subject-select'>Выберите предмет(ы):</label>
+        <select id='subject-select' name='subjects[]' class="browser-default">
+          <option value=''>Выберите предмет(ы)</option>
+          <!-- Предметы будут загружены через JS -->
+        </select>
+      </div>
+      <div id='classes-container' style='display: none;'>
+        <label for='class-select'>Выберите класс:</label>
+        <select id='class-select' name='class' class="browser-default">
+          <option value=''>Выберите класс</option>
+          <!-- Классы будут загружены через JS -->
+        </select>
+      </div>
+      <button type='submit' class="btn">Зарегистрироваться</button>
+    </form>
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script>
-   $(document).ready(function() {
-  // Инициализация select элементов Materialize
-  $('select').formSelect();
+  $(document).ready(function() {
+    $('select').formSelect();
 
-  // Ограничение ввода в поля имени и фамилии
-  $("#firstName, #lastName").on('input', function() {
-    this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '');
-  });
+    $("#firstName, #lastName").on('input', function() {
+      this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '');
+    });
 
-  $('#role').change(function() {
-    if ($(this).val() === 'teacher') {
-      $('#subjects-container').show();
-      $('#classes-container').hide();
-      loadSubjects();
-    } else if ($(this).val() === 'student') {
-      $('#classes-container').show();
-      $('#subjects-container').hide();
-      loadClasses();
-    } else {
-      $('#subjects-container').hide();
-      $('#classes-container').hide();
+    $('#role').change(function() {
+      if ($(this).val() === 'teacher') {
+        $('#subjects-container').show();
+        $('#classes-container').hide();
+        loadSubjects();
+      } else if ($(this).val() === 'student') {
+        $('#classes-container').show();
+        $('#subjects-container').hide();
+        loadClasses();
+      } else {
+        $('#subjects-container').hide();
+        $('#classes-container').hide();
+      }
+    });
+
+    function loadSubjects() {
+      $.get('/auth/subjects', function(data) {
+        const select = $('#subject-select');
+        select.empty();
+        select.append('<option value="" disabled>Выберите предмет(ы)</option>');
+        data.forEach(function(subj) {
+          select.append('<option value="' + subj.name + '">' + subj.name + '</option>');
+        });
+        select.formSelect();
+      }).fail(function(xhr) {
+        console.error('Ошибка загрузки предметов:', xhr);
+      });
     }
+
+    function loadClasses() {
+      $.get('/auth/classes', function(data) {
+        const select = $('#class-select');
+        select.empty();
+        select.append('<option value="" disabled selected>Выберите класс</option>');
+        data.forEach(function(cls) {
+          select.append('<option value="' + cls.name + '">' + cls.name + '</option>');
+        });
+        select.formSelect();
+      }).fail(function(xhr) {
+        console.error('Ошибка загрузки классов:', xhr);
+      });
+    }
+
+    $("#register-form").submit(function(e) {
+      e.preventDefault();
+      const form = $(this);
+      $.post(form.attr('action'), form.serialize()).done(function(response) {
+        if (response.message === 'Пользователь с таким email уже существует') {
+          M.toast({html: response.message, classes: 'rounded red'});
+        } else if (response.message === 'Регистрация прошла успешно') {
+          M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
+          setTimeout(function() {
+            window.location.href = '/auth/login';
+          }, 1500);
+        } else {
+          M.toast({html: response.message, classes: 'rounded red'});
+        }
+      }).fail(function(xhr) {
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+          M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
+        } else {
+          M.toast({html: 'Произошла ошибка при попытке регистрации', classes: 'rounded red'});
+        }
+      });
+    });
   });
 
-  function loadSubjects() {
-    $.get('/auth/subjects', function(data) {
-      console.log('Loaded subjects:', data);
-      const select = $('#subject-select');
-      select.empty();
-      select.append('<option value="" disabled>Выберите предмет(ы)</option>');
-      data.forEach(function(subj) {
-        select.append('<option value="' + subj.name + '">' + subj.name + '</option>');
-      });
-      select.formSelect();
-    }).fail(function(xhr) {
-      console.error('Ошибка загрузки предметов:', xhr);
-    });
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.getElementById('header');
+    const content = document.getElementById('content');
+    if (sidebar && header && content) {
+      sidebar.classList.toggle('visible');
+      header.classList.toggle('sidebar-open');
+      content.classList.toggle('sidebar-open');
+    }
   }
 
-  function loadClasses() {
-    $.get('/auth/classes', function(data) {
-      console.log('Loaded classes:', data);
-      const select = $('#class-select');
-      select.empty();
-      select.append('<option value="" disabled selected>Выберите класс</option>');
-      data.forEach(function(cls) {
-        select.append('<option value="' + cls.name + '">' + cls.name + '</option>');
-      });
-      select.formSelect();
-    }).fail(function(xhr) {
-      console.error('Ошибка загрузки классов:', xhr);
-    });
+  function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.getElementById('header');
+    const content = document.getElementById('content');
+    if (sidebar && header && content) {
+      sidebar.classList.remove('visible');
+      header.classList.remove('sidebar-open');
+      content.classList.remove('sidebar-open');
+    }
   }
-
-  $("#register-form").submit(function(e) {
-    e.preventDefault();
-    const form = $(this);
-    $.post(form.attr('action'), form.serialize()).done(function(response) {
-      if (response.message === 'Пользователь с таким email уже существует') {
-        M.toast({html: response.message, classes: 'rounded red'});
-      } else if (response.message === 'Регистрация прошла успешно') {
-        M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
-        setTimeout(function() {
-          window.location.href = '/auth/login';
-        }, 1500);
-      } else {
-        M.toast({html: response.message, classes: 'rounded red'});
-      }
-    }).fail(function(xhr) {
-      if (xhr.responseJSON && xhr.responseJSON.message) {
-        M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
-      } else {
-        M.toast({html: 'Произошла ошибка при попытке регистрации', classes: 'rounded red'});
-      }
-    });
-  });
-});
-
-
 </script>
 </body>
 </html>

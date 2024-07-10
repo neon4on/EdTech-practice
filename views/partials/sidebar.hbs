@@ -2,84 +2,141 @@
   <div class="sidebar-header">
     <img src="/images/logo.svg" alt="Иконка компании">
     <span>ООО "Онлайн Платоникс"</span>
-    <button class="close-sidebar-button" onclick="closeSidebar()">✖️</button>
+    <span class="material-icons close-sidebar-button" onclick="closeSidebar()" style="cursor: pointer;">close</span>
+
   </div>
-  <nav class="menu">
+  <div class="menu">
     <ul>
 
       {{#if user}}
-        {{#if (eq user.role "admin")}}
-          <li><a href="/schedule">Расписание</a></li>
-          <li><a href="/groups">Группы</a></li>
-          <li><a href="/study_plans">Учебные планы</a></li>
-          <li><a href="/class_book">Журнал</a></li>
-          <li><a href="/auth/register">Регистрация</a></li>
-        {{else if (eq user.role "teacher")}}
-          <li><a href="/schedule">Расписание</a></li>
-          <li><a href="/study_plans">Учебные планы</a></li>
-          <li><a href="/class_book">Журнал</a></li>
-          <li><a href="/grade">Оценки</a></li>
-        {{else if (eq user.role "student")}}
-          <li><a href="/schedule">Расписание</a></li>
-          <li><a href="/grade">Оценки</a></li>
-        {{/if}}
+  {{#if (eq user.role "admin")}}
+    <li><a href="/groups"><i class="tiny material-icons">group</i> Группы</a></li>
+    <li><a href="/study_plans"><i class="tiny material-icons">book</i> Учебные планы</a></li>
+    <li><a href="/class_book"><i class="tiny material-icons">assignment</i> Журнал</a></li>
+    <li><a href="/auth/register"><i class="tiny material-icons">person_add</i> Регистрация</a></li>
+  {{else if (eq user.role "teacher")}}
+    <li><a href="/study_plans"><i class="tiny material-icons">book</i> Учебные планы</a></li>
+    <li><a href="/class_book"><i class="tiny material-icons">assignment</i> Журнал</a></li>
+  {{else if (eq user.role "student")}}
+    <li><a href="/schedule"><i class="tiny material-icons">event_note</i> Расписание</a></li>
+    <li><a href="/grade"><i class="tiny material-icons">assessment</i> Оценки</a></li>
+  {{/if}}
+{{/if}}
 
-      {{/if}}
+
 
     </ul>
-  </nav>
+  </div>
 </aside>
 
 <style>
-  .sidebar {
-    width: 250px;
-    background-color: #343a40;
-    color: #fff;
-    position: fixed;
-    left: -250px;
-    top: 0;
-    height: 100%;
-    transition: left 0.3s ease;
-    display: flex;
-    flex-direction: column;
-  }
-  .sidebar.visible {
-    left: 0;
-  }
-  .sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-    background-color: #23272b;
-    border-bottom: 1px solid #444;
-  }
-  .sidebar-header img {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
-  }
-  .close-sidebar-button {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  .menu {
-    padding: 20px;
-  }
-  .menu ul {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  .menu ul li {
-    margin-bottom: 10px;
-  }
-  .menu ul li a {
-    color: #fff;
-    text-decoration: none;
-  }
+          body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            transition: margin-left 0.3s ease;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            transition: margin-left 0.3s ease;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        .header-left img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        .header-right span {
+            margin-right: 20px;
+        }
+        .header-right button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .header-right button:hover {
+            background-color: #0056b3;
+        }
+        .toggle-sidebar-button {
+            margin-right: 20px;
+        }
+        .header.sidebar-open {
+            margin-left: 250px;
+        }
+        .content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+        .content.sidebar-open {
+            margin-left: 250px;
+        }
+        .sidebar {
+            width: 25px;
+            background-color: #343a40;
+            color: #fff;
+            position: fixed;
+            left: -250px;
+            top: 0;
+            height: 100%;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar.visible {
+            left: 0;
+        }
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #23272b;
+            border-bottom: 1px solid #444;
+        }
+        .sidebar-header img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .close-sidebar-button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .menu {
+            padding: 20px;
+        }
+        .menu ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .menu ul li {
+            margin-bottom: 10px;
+        }
+        .menu ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+
+
 </style>

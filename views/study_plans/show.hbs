@@ -1,53 +1,76 @@
+<!DOCTYPE html>
 <html>
-  <head>
+<head>
+    <meta charset="UTF-8">
     <title>{{studyPlan.title}}</title>
-    <style>
-      .excelData {
-        margin-top: 20px;
-        border-collapse: collapse;
-        width: 100%;
-      }
-      .excelData th, .excelData td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: center;
-      }
-      .subject-name {
-        text-align: left;
-      }
-    </style>
-  </head>
-  <body>
+    <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css">
+</head>
+<body>
+
+
+<div class="content" id="content">
+  <i class="material-icons" style="font-size: 24px; color: #007bff; cursor: pointer;" onclick="location.href='/study_plans';">arrow_back</i>
     <h1>{{studyPlan.title}}</h1>
     <p>Описание: {{studyPlan.description}}</p>
-    <p>ID группы: {{studyPlan.groupid}}</p>
-    <button onclick="location.href='/study_plans';">Вернуться к списку учебных планов</button>
-
+    <p>ID группы: {{studyPlan.classid}}</p>
+    
     <div class='excelData'>
-      <h2>Данные из Excel:</h2>
-      <table class='excelData'>
-        <thead>
-          <tr>
-            <th rowspan='2'>Название предмета</th>
-            <th colspan='{{classesLength}}'>Количество часов в неделю для:</th>
-          </tr>
-          <tr>
-            {{#each classes}}
-              <th>{{this}}</th>
-            {{/each}}
-          </tr>
-        </thead>
-        <tbody>
-          {{#each formattedData}}
-            <tr>
-              <td class='subject-name'>{{this.subject}}</td>
-              {{#each this.hours}}
-                <td>{{this}}</td>
-              {{/each}}
-            </tr>
-          {{/each}}
-        </tbody>
-      </table>
+        <h2>Данные из Excel:</h2>
+        <table class='excelData'>
+            <thead>
+                <tr>
+                    <th rowspan='2'>Название предмета</th>
+                    <th colspan='{{classesLength}}'>Количество часов в неделю для:</th>
+                </tr>
+                <tr>
+                    {{#each classes}}
+                        <th>{{this}}</th>
+                    {{/each}}
+                </tr>
+            </thead>
+            <tbody>
+                {{#each formattedData}}
+                    <tr>
+                        <td class='subject-name'>{{this.subject}}</td>
+                        {{#each this.hours}}
+                            <td>{{this}}</td>
+                        {{/each}}
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
     </div>
-  </body>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const header = document.getElementById('header');
+        const content = document.getElementById('content');
+        sidebar.classList.toggle('visible');
+        header.classList.toggle('sidebar-open');
+        content.classList.toggle('sidebar-open');
+    }
+
+    function closeSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const header = document.getElementById('header');
+        const content = document.getElementById('content');
+        sidebar.classList.remove('visible');
+        header.classList.remove('sidebar-open');
+        content.classList.remove('sidebar-open');
+    }
+
+    function logout() {
+        $.post('/auth/logout').done(function(response) {
+            alert(response.message);
+            window.location.href = '/auth/login';
+        }).fail(function(xhr) {
+            alert('Ошибка при выходе: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'неизвестная ошибка'));
+        });
+    }
+</script>
+
+</body>
 </html>

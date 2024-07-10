@@ -1,73 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Редактирование учебного плана</title>
+    <title>Редактировать учебный план</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css"> <!-- Добавлен стиль для адаптации -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
-  <h1>Редактировать</h1>
-    <div class="container">
-        
-        <form id="editStudyPlanForm" action="/study_plans/edit/{{studyPlan.id}}" method="post" enctype="multipart/form-data">
-            <div class="input-field">
-                <input type="text" id="title" name="title" value="{{studyPlan.title}}" required>
-                <label for="title">Название</label>
-            </div>
-            <div class="input-field">
-                <textarea id="description" name="description" class="materialize-textarea">{{studyPlan.description}}</textarea>
-                <label for="description">Описание</label>
-            </div>
-            <div class="input-field">
-                <input type="text" id="groupId" name="groupId" value="{{studyPlan.groupid}}" required>
-                <label for="groupId">ID группы</label>
-            </div>
-             <label for="file">Не добавляйте файл, если не хотите его заменять</label><br>
+    
+
+    <div class="content" id="content">
+        <i class="material-icons" style="font-size: 24px; color: #007bff; cursor: pointer;" onclick="location.href='/study_plans';">arrow_back</i>
+        <h1 class="center-align">Редактировать учебный план</h1>
+        <form id="editStudyPlanForm" enctype="multipart/form-data">
+            <input type="hidden" id="studyPlanId" name="studyPlanId" value="{{ studyPlan.id }}">
+            <label for="title">Название:</label><br>
+            <input type="text" id="title" name="title" value="{{ studyPlan.title }}" required><br>
+            <label for="description">Описание:</label><br>
+            <input type="text" id="description" name="description" value="{{ studyPlan.description }}" required><br>
+            <label for="subjectid">Предмет:</label><br>
+            <select id="subjectid" name="subjectid" required></select><br>
+            <label for="classid">Класс:</label><br>
+            <select id="classid" name="classid" required></select><br>
+            
             <div class="file-field input-field">
                 <div class="btn">
-                    <span>Заменить файл</span>
-                    <input type="file" id="newFile" name="newFile">
+                    <span>Изменить файл</span>
+                    <input type="file" id="file" name="file">
                 </div>
                 <div class="file-path-wrapper">
-                    <input class="file-path validate" type="text" placeholder="Выберите файл">
+                    <input class="file-path validate" type="text" placeholder="Текущий файл: {{ studyPlan.file_id }}">
                 </div>
             </div>
-            <input type="submit" value="Сохранить" class="btn">
-            <button onclick="location.href='/study_plans'" class="btn">Вернуться назад</button>
+            <button type="submit" id="btnEditStPlan" class="btn">Сохранить изменения</button>
+            {{!-- <button type="button" onclick="window.location.href='/study_plans/{{ studyPlan.id }}'" class="waves-effect waves-light btn">Отмена</button> --}}
         </form>
-       
     </div>
-     
 
     <script>
-        $(document).ready(function(){
-            M.updateTextFields(); // Update text fields for Materialize
+        $(document).ready(function() {
+            $('select').formSelect();
 
-            // Handle form submission using AJAX
-            $('#editStudyPlanForm').submit(function(e){
+            // Заполнение данных предметов
+            $.get('/study_plans/subjects', function(data) {
+                data.forEach(subject => {
+                    $('#subjectid').append(`<option value="${subject.id}">${subject.name}</option>`);
+                });
+                $('#subjectid').val('{{ studyPlan.subjectid }}'); // Выбор текущего предмета
+                $('select').formSelect();
+            });
+
+            // Заполнение данных классов
+            $.get('/study_plans/classes', function(data) {
+                data.forEach(cls => {
+                    $('#classid').append(`<option value="${cls.id}">${cls.name}</option>`);
+                });
+                $('#classid').val('{{ studyPlan.classid }}'); // Выбор текущего класса
+                $('select').formSelect();
+            });
+
+            // Обработка формы редактирования
+            $("#btnEditStPlan").click(function(e) {
                 e.preventDefault();
-                var formData = new FormData($(this)[0]);
+                var formData = new FormData($("#editStudyPlanForm")[0]);
 
                 $.ajax({
-                    url: $(this).attr('action'),
-                    type: 'POST',
+                    url: "/study_plans/{{ studyPlan.id }}/edit",
+                    type: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function(data){
-                        M.toast({html: 'Учебный план успешно обновлен', classes: 'rounded'});
-                        setTimeout(function(){
-                            window.location.href = '/study_plans';
-                        }, 3000); // Redirect after 3 seconds
+                    success: function(data) {
+                        if (data.message === "Study plan updated") {
+                            M.toast({html: 'Изменения сохранены', classes: 'rounded'});
+                            setTimeout(function() {
+                                window.location.href = '/study_plans/{{ studyPlan.id }}';
+                            }, 3000);
+                        } else {
+                            M.toast({html: 'Ошибка при сохранении изменений', classes: 'rounded'});
+                        }
                     },
-                    error: function(jqXHR){
-                        var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при обновлении учебного плана';
-                        M.toast({html: message, classes: 'rounded red lighten-1'});
+                    error: function(jqXHR) {
+                        var message = jqXHR.responseJSON ? jqXHR.responseJSON.message : 'Ошибка при сохранении изменений';
+                        M.toast({html: message, classes: 'rounded'});
                     }
                 });
             });
         });
+
+        // Функции для управления боковым меню
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('visible');
+            header.classList.toggle('sidebar-open');
+            content.classList.toggle('sidebar-open');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const header = document.getElementById('header');
+            const content = document.getElementById('content');
+            sidebar.classList.remove('visible');
+            header.classList.remove('sidebar-open');
+            content.classList.remove('sidebar-open');
+        }
+
+        // Функция для выхода из системы
+        function logout() {
+            $.post('/auth/logout').done(function(response) {
+                alert(response.message);
+                window.location.href = '/auth/login';
+            }).fail(function(xhr) {
+                alert('Ошибка при выходе: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'неизвестная ошибка'));
+            });
+        }
     </script>
 </body>
 </html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Отсутствие студента</title>
+</head>
+<body>
+  <h1>Отсутствие студента: {{student.firstname}} {{student.lastname}}</h1>
+  <form action="/students/{{student.id}}/attendance" method="POST">
+    <label for="type">Тип отсутствия:</label>
+    <input type="text" id="type" name="type" value="{{attendance.[0].type}}" required><br>
+
+    <label for="date">Дата:</label>
+    <input type="text" id="date" name="date" value="{{attendance.[0].date}}" required><br>
+
+    <label for="comment">Комментарий:</label>
+    <input type="text" id="comment" name="comment" value="{{attendance.[0].comment}}"><br>
+
+    <button type="submit">Сохранить</button>
+  </form>
+</body>
+</html>

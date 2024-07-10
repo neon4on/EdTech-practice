@@ -11,7 +11,8 @@ const groupRoutes = require('./routes/group');
 const studyplanRoutes = require('./routes/study_plan');
 const classBookRoutes = require('./routes/class_book'); // Подключаем маршрут для журнала
 const indexRoutes = require('./routes/index');
-const attendanceRoutes = require('./routes/attendance');
+const homeworkList = require('./routes/homework');
+const attendanceRoutes = require('./routes/classes');
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/EdTech-practice/public', express.static(path.join(__dirname, 'public')));
 
 // Middleware для проверки аутентификации
 app.use((req, res, next) => {
@@ -93,9 +95,16 @@ app.use('/class_book', (req, res, next) => {
   next();
 }, classBookRoutes);
 
+app.use('/homework', (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/auth/login');
+  }
+  next();
+}, homeworkList);
+
 app.use('/auth', authRouter);
 
-app.use('/attendance', (req, res, next) => {
+app.use('/classes', (req, res, next) => {
   if (!req.session.user) {
     return res.redirect('/auth/login');
   }

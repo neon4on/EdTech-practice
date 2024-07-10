@@ -95,15 +95,15 @@ router.post('/:id/delete', async (req, res) => {
   const { id } = req.params;
 
   try {
-    await sequelize.query(
-      'DELETE FROM classes WHERE id = ?',
-      { replacements: [id] }
-    );
+      await sequelize.query(
+          'DELETE FROM classes WHERE id = ?',
+          { replacements: [id] }
+      );
 
-    res.json({ message: 'Группа успешно удалена!' });
+      res.json({ message: 'Группа успешно удалена!' });
   } catch (error) {
-    console.error('Ошибка при удалении данных из базы:', error);
-    res.status(500).json({ message: 'Ошибка: не удалось удалить группу!' });
+      console.error('Ошибка при удалении данных из базы:', error);
+      res.status(500).json({ message: 'Ошибка: не удалось удалить группу!' });
   }
 });
 

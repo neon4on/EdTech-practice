@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        .top-right-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body>
+    <h1 class="center-align">Посещаемость</h1>
+    <div class="container">
+        <div class="top-right-btn">
+            <a href="/classes/table" class="btn waves-effect waves-light">Посмотреть таблицу</a>
+        </div>
+
+        <!-- Выпадающий список для выбора группы -->
+        <div class="input-field col s12">
+            <select id="class-select">
+                <option value="" disabled selected>Выберите класс</option>
+                {{#each classes}}
+                    <option value="{{this.id}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+            <label>Класс</label>
+        </div>
+
+        <!-- Контейнер для отображения списка учеников -->
+        <div id="students-container">
+            <!-- Здесь будут отображаться данные о выбранном классе -->
+        </div>
+
+        <!-- Форма для редактирования посещаемости ученика -->
+        <div id="attendance-form" style="display: none;">
+            <h5>Сообщить об отсутствии</h5>
+            <div class="row">
+                <div class="input-field col s6">
+                    <input type="text" class="datepicker" id="date-from">
+                    <label for="date-from">Дата от</label>
+                </div>
+                <div class="input-field col s6">
+                    <input type="text" class="datepicker" id="date-to">
+                    <label for="date-to">Дата до</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12">
+                    <select id="attendance-type">
+                        <option value="" disabled selected>Выберите причину отсутствия</option>
+                        <option value="Болезнь">Болезнь</option>
+                        <option value="Семейные обст.">Семейные обст.</option>
+                        <option value="Своя">Своя</option>
+                    </select>
+                    <label>Тип посещаемости</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12">
+                    <textarea id="comment" class="materialize-textarea"></textarea>
+                    <label for="comment">Комментарий</label>
+                </div>
+            </div>
+            <button id="save-attendance" class="btn waves-effect waves-light">Сохранить</button>
+            <button id="back-to-students" class="btn waves-effect waves-light red">Назад к ученикам</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            M.AutoInit();
+
+            // Инициализация календаря
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd'
+            });
+
+            $('#class-select').change(function() {
+                var classId = $(this).val();
+                if (classId) {
+                    $.get('/classes/class/' + classId, function(users) {
+                        var html = '<ul class="collection">';
+                        users.forEach(function(user) {
+                            html += '<li class="collection-item"><a href="#" class="student-link" data-user-id="' + user.id + '">' + user.firstname + ' ' + user.lastname + '</a></li>';
+                        });
+                        html += '</ul>';
+                        $('#students-container').html(html);
+                        $('#students-container').show();
+                        $('#attendance-form').hide();
+                    }).fail(function(xhr, status, error) {
+                        console.error('Error fetching users:', error);
+                    });
+                } else {
+                    $('#students-container').html('');
+                }
+            });
+
+            $(document).on('click', '.student-link', function(e) {
+                e.preventDefault();
+                var userId = $(this).data('user-id');
+                $('#students-container .collection-item').hide();
+                $(this).closest('.collection-item').show();
+                $('#attendance-form').show().data('user-id', userId);
+            });
+
+            $('#back-to-students').click(function() {
+                $('#students-container .collection-item').show();
+                $('#attendance-form').hide();
+            });
+
+            $('#save-attendance').click(function() {
+                var userId = $('#attendance-form').data('user-id');
+                var dateFrom = $('#date-from').val();
+                var dateTo = $('#date-to').val();
+                var attendanceType = $('#attendance-type').val();
+                var comment = $('#comment').val();
+
+                if (!userId || !dateFrom || !dateTo || !attendanceType) {
+                    M.toast({html: 'Пожалуйста, заполните все поля!'});
+                    return;
+                }
+
+                $.ajax({
+                    url: '/classes/save-attendance',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        userId: userId,
+                        dateFrom: dateFrom,
+                        dateTo: dateTo,
+                        attendanceType: attendanceType,
+                        comment: comment
+                    }),
+                    success: function(response) {
+                        M.toast({html: 'Посещаемость сохранена успешно!'});
+                        $('#attendance-form').hide();
+                        $('#attendance-form').find('input, select, textarea').val('');
+                        M.updateTextFields();
+                        $('#students-container .collection-item').show();
+                    },
+                    error: function(error) {
+                        M.toast({html: 'Ошибка при сохранении посещаемости!'});
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
