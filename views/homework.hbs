@@ -6,7 +6,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <style>
-    /* Стили */
+    /* Ваши стили */
   </style>
 </head>
 <body>
@@ -16,14 +16,13 @@
       <a href="/" class="btn waves-effect waves-light">Назад к главной странице</a>
     </div>
     <div class="input-field col s12">
-      <select id="subject-select" class="browser-default">
-        <option value="" disabled selected>Выберите предмет</option>
+      <select id="class-select" class="browser-default">
+        <option value="" disabled selected>Выберите класс</option>
       </select>
-    
     </div>
     <div class="input-field col s12">
-      <select id="class-select" class="browser-default" disabled>
-        <option value="" disabled selected>Выберите класс</option>
+      <select id="subject-select" class="browser-default" disabled>
+        <option value="" disabled selected>Выберите предмет</option>
       </select>
     </div>
     <table class="highlight">
@@ -46,20 +45,6 @@
 
   <script>
     $(document).ready(function() {
-      function loadSubjects() {
-        $.get('/homework/subjects')
-          .done(function(data) {
-            const subjectSelect = $('#subject-select');
-            subjectSelect.empty().append('<option value="" disabled selected>Выберите предмет</option>');
-            data.forEach(function(subject) {
-              subjectSelect.append(`<option value="${subject.id}">${subject.name}</option>`);
-            });
-          })
-          .fail(function(xhr) {
-            console.error('Ошибка загрузки предметов:', xhr);
-          });
-      }
-
       function loadClasses() {
         $.get('/homework/classes')
           .done(function(data) {
@@ -75,11 +60,26 @@
           });
       }
 
-      function loadHomework() {
-        const subjectId = $('#subject-select').val();
-        const classId = $('#class-select').val();
+      function loadSubjects(classId) {
+        $.get('/homework/subjects', { classId })
+          .done(function(data) {
+            const subjectSelect = $('#subject-select');
+            subjectSelect.empty().append('<option value="" disabled selected>Выберите предмет</option>');
+            data.forEach(function(subject) {
+              subjectSelect.append(`<option value="${subject.id}">${subject.name}</option>`);
+            });
+            subjectSelect.prop('disabled', false);
+          })
+          .fail(function(xhr) {
+            console.error('Ошибка загрузки предметов:', xhr);
+          });
+      }
 
-        if (subjectId && classId) {
+      function loadHomework() {
+        const classId = $('#class-select').val();
+        const subjectId = $('#subject-select').val();
+
+        if (classId && subjectId) {
           $.get('/homework/schedule', { subjectId, classId })
             .done(function(scheduleData) {
               const homeworkTableBody = $('#homework-table-body');
@@ -91,28 +91,27 @@
                     if (homeworkData.length > 0) {
                       homeworkData.forEach(function(item) {
                         const row = `
-  <tr>
-    <td>${item.firstname || 'Не указано'}</td>
-    <td>${item.lastname || 'Не указано'}</td>
-    <td>${item.subject_name}</td>
-    <td>${lesson.fullDate}</td>
-    <td>
-      ${item.attachment_filename ? `<a href="/homework/download_homework_file?subjectId=${subjectId}&classId=${classId}&date=${lesson.fullDate}" download="${item.attachment_filename}">Скачать</a>` : 'Нет файла'}
-    </td>
-    <td>
-      <input type="text" id="comment-${item.id}" class="comment-input" placeholder="Оставьте комментарий" value="${item.comment || ''}">
-    </td>
-    <td>
-  <button class="btn waves-effect waves-light" onclick="addComment(${item.id})">Добавить</button>
-
-      <button class="btn waves-effect waves-light red delete-btn" 
-              data-homework-id="${item.id}" 
-              data-class-id="${classId}" 
-              data-subject-id="${subjectId}" 
-              data-lesson-date="${lesson.fullDate}">Удалить</button>
-    </td>
-  </tr>
-`;
+                          <tr>
+                            <td>${item.firstname || 'Не указано'}</td>
+                            <td>${item.lastname || 'Не указано'}</td>
+                            <td>${item.subject_name}</td>
+                            <td>${lesson.fullDate}</td>
+                            <td>
+                              ${item.attachment_filename ? `<a href="/homework/download_homework_file?subjectId=${subjectId}&classId=${classId}&date=${lesson.fullDate}" download="${item.attachment_filename}">Скачать</a>` : 'Нет файла'}
+                            </td>
+                            <td>
+                              <input type="text" id="comment-${item.id}" class="comment-input" placeholder="Оставьте комментарий" value="${item.comment || ''}">
+                            </td>
+                            <td>
+                              <button class="btn waves-effect waves-light" onclick="addComment(${item.id})">Добавить</button>
+                              <button class="btn waves-effect waves-light red delete-btn"
+                                data-homework-id="${item.id}"
+                                data-class-id="${classId}"
+                                data-subject-id="${subjectId}"
+                                data-lesson-date="${lesson.fullDate}">Удалить</button>
+                            </td>
+                          </tr>
+                        `;
 
                         homeworkTableBody.append(row);
                       });
@@ -129,70 +128,68 @@
         }
       }
 
-window.addComment = function(homeworkId) {
-  const comment = $(`#comment-${homeworkId}`).val();
-  const row = $(`#comment-${homeworkId}`).closest('tr');
-  const classId = row.find('.delete-btn').data('class-id');
-  const subjectId = row.find('.delete-btn').data('subject-id');
-  const date = row.find('.delete-btn').data('lesson-date');
-  
-  $.ajax({
-    url: '/homework/comment',
-    method: 'POST',
-    contentType: 'application/json',
-     data: JSON.stringify({ classId, subjectId, date, comment }),
-    success: function(response) {
-      alert('Комментарий добавлен');
-      loadHomework(); // Перезагрузка домашнего задания после добавления комментария
-    },
-    error: function(xhr, status, error) {
-      console.error('Ошибка добавления комментария:', error);
-      alert('Ошибка при добавлении комментария: ' + xhr.responseJSON.message);
-    }
-  });
-};
+      window.addComment = function(homeworkId) {
+        const comment = $(`#comment-${homeworkId}`).val();
+        const row = $(`#comment-${homeworkId}`).closest('tr');
+        const classId = row.find('.delete-btn').data('class-id');
+        const subjectId = row.find('.delete-btn').data('subject-id');
+        const date = row.find('.delete-btn').data('lesson-date');
 
+        $.ajax({
+          url: '/homework/comment',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ classId, subjectId, date, comment }),
+          success: function(response) {
+            alert('Комментарий добавлен');
+            loadHomework(); // Перезагрузка домашнего задания после добавления комментария
+          },
+          error: function(xhr, status, error) {
+            console.error('Ошибка добавления комментария:', error);
+            alert('Ошибка при добавлении комментария: ' + xhr.responseJSON.message);
+          }
+        });
+      };
 
+      $(document).on('click', '.delete-btn', function() {
+        const homeworkId = $(this).data('homework-id');
+        const classId = $(this).data('class-id');
+        const subjectId = $(this).data('subject-id');
+        const lessonDate = $(this).data('lesson-date');
 
-     $(document).on('click', '.delete-btn', function() {
-  const homeworkId = $(this).data('homework-id');
-  const classId = $(this).data('class-id');
-  const subjectId = $(this).data('subject-id');
-  const lessonDate = $(this).data('lesson-date');
+        if (!homeworkId || !classId || !subjectId || !lessonDate) {
+          console.error('Не все данные доступны для удаления:', { homeworkId, classId, subjectId, lessonDate });
+          alert('Ошибка: не все данные доступны для удаления');
+          return;
+        }
 
-  if (!homeworkId || !classId || !subjectId || !lessonDate) {
-    console.error('Не все данные доступны для удаления:', { homeworkId, classId, subjectId, lessonDate });
-    alert('Ошибка: не все данные доступны для удаления');
-    return;
-  }
-
-  if (confirm('Вы уверены, что хотите удалить запись о домашнем задании?')) {
-    $.ajax({
-      url: '/homework/delete_homework',
-      method: 'DELETE',
-      contentType: 'application/json',
-       data: JSON.stringify({ homeworkId, classId, subjectId, lessonDate }),
-      success: function(response) {
-        alert('Запись о домашнем задании удалена');
-        loadHomework(); // Перезагрузка домашнего задания после удаления
-      },
-      error: function(xhr, status, error) {
-        console.error('Ошибка:', error);
-        alert('Ошибка при удалении записи о домашнем задании: ' + xhr.responseText);
-      }
-    });
-  }
-});
-
-
-      loadSubjects();
-
-      $('#subject-select').change(function() {
-        loadClasses();
+        if (confirm('Вы уверены, что хотите удалить запись о домашнем задании?')) {
+          $.ajax({
+            url: '/homework/delete_homework',
+            method: 'DELETE',
+            contentType: 'application/json',
+            data: JSON.stringify({ homeworkId, classId, subjectId, lessonDate }),
+            success: function(response) {
+              alert('Запись о домашнем задании удалена');
+              loadHomework(); // Перезагрузка домашнего задания после удаления
+            },
+            error: function(xhr, status, error) {
+              console.error('Ошибка:', error);
+              alert('Ошибка при удалении записи о домашнем задании: ' + xhr.responseText);
+            }
+          });
+        }
       });
 
+      loadClasses();
+
       $('#class-select').change(function() {
-        loadHomework();
+        const classId = $(this).val();
+        loadSubjects(classId); // При изменении класса загружаем предметы
+      });
+
+      $('#subject-select').change(function() {
+        loadHomework(); // При изменении предмета загружаем домашние задания
       });
     });
   </script>

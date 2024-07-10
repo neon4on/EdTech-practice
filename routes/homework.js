@@ -7,32 +7,51 @@ const xlsx = require('xlsx');
 const { QueryTypes } = require('sequelize');
 
 router.get('/', (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'teacher') {
+  if (!req.session.user || !['teacher', 'admin', 'tutor'].includes(req.session.user.role)) {
     return res.status(403).json({ message: 'Доступ запрещен' });
   }
+  
   res.render('homework', { title: 'Журнал' });
 });
 
 router.get('/subjects', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'teacher') {
+  if (!req.session.user || !['teacher', 'admin', 'tutor'].includes(req.session.user.role)) {
     return res.status(403).json({ message: 'Доступ запрещен' });
   }
+  
+  const { classId } = req.query;
 
   try {
-    const [subjects] = await sequelize.query(`
-      SELECT s.id, s.name
+    let subjectsQuery = `
+      SELECT DISTINCT s.id, s.name
       FROM subjects s
-      JOIN user_subjects us ON s.id = us.subject_id
-      WHERE us.user_id = ?
-    `, {
-      replacements: [req.session.user.id]
-    });
+      JOIN homework h ON s.id = h.subject_id
+      WHERE h.class_id = :classId
+    `;
+    
+    const replacements = { classId };
+
+    if (req.session.user.role !== 'admin') {
+      subjectsQuery += `
+        AND EXISTS (
+          SELECT 1
+          FROM user_subjects us
+          WHERE us.user_id = :userId
+          AND us.subject_id = s.id
+        )
+      `;
+      replacements.userId = req.session.user.id;
+    }
+    
+    const [subjects] = await sequelize.query(subjectsQuery, { replacements });
     res.json(subjects);
   } catch (error) {
     console.error('Error loading subjects:', error);
     res.status(500).json({ message: 'Ошибка загрузки предметов' });
   }
 });
+
+
 
 router.get('/classes', async (req, res) => {
   try {
@@ -46,9 +65,10 @@ router.get('/classes', async (req, res) => {
 
 router.get('/students', async (req, res) => {
   const { classId } = req.query;
-  if (!req.session.user || req.session.user.role !== 'teacher') {
+  if (!req.session.user || !['teacher', 'admin', 'tutor'].includes(req.session.user.role)) {
     return res.status(403).json({ message: 'Доступ запрещен' });
   }
+  
 
   try {
     const [students] = await sequelize.query(`
@@ -68,9 +88,10 @@ router.get('/students', async (req, res) => {
 
 router.get('/schedule', async (req, res) => {
   const { subjectId, classId } = req.query;
-  if (!req.session.user || req.session.user.role !== 'teacher') {
+  if (!req.session.user || !['teacher', 'admin', 'tutor'].includes(req.session.user.role)) {
     return res.status(403).json({ message: 'Доступ запрещен' });
   }
+  
 
   const currentDate = moment();
   const startOfCurrentMonth = currentDate.startOf('month').format('YYYY-MM-DD');
@@ -118,10 +139,10 @@ router.get('/homework', (req, res, next) => {
 
 router.get('/get_homework', async (req, res) => {
   const { classId, subjectId, date } = req.query;
-  if (!req.session.user || req.session.user.role !== 'teacher') {
+  if (!req.session.user || !['teacher', 'admin', 'tutor'].includes(req.session.user.role)) {
     return res.status(403).json({ message: 'Доступ запрещен' });
   }
-
+  
   try {
     const [homework] = await sequelize.query(`
       SELECT h.homework_text, h.attachment, h.attachment_filename, h.comment, u.firstname, u.lastname, s.name as subject_name
@@ -146,9 +167,10 @@ router.get('/get_homework', async (req, res) => {
 
 router.get('/download_homework_file', async (req, res) => {
   const { classId, subjectId, date } = req.query;
-  if (!req.session.user || req.session.user.role !== 'teacher') {
+  if (!req.session.user || !['teacher', 'admin', 'tutor'].includes(req.session.user.role)) {
     return res.status(403).json({ message: 'Доступ запрещен' });
   }
+  
 
   try {
     const [homework] = await sequelize.query(`
@@ -174,9 +196,10 @@ router.get('/download_homework_file', async (req, res) => {
 
 router.post('/comment', async (req, res) => {
   const { classId, subjectId, date, comment } = req.body;
-  if (!req.session.user || req.session.user.role !== 'teacher') {
+  if (!req.session.user || !['teacher', 'admin', 'tutor'].includes(req.session.user.role)) {
     return res.status(403).json({ message: 'Доступ запрещен' });
   }
+  
 
   if (!classId || !subjectId || !date || comment === undefined) {
     return res.status(400).json({ message: 'Отсутствуют необходимые данные' });
