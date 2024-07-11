@@ -3,8 +3,7 @@
 <head>
     <title>Создать учебный план</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    
-   
+    <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css"> <!-- Добавлен стиль для адаптации -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
@@ -12,6 +11,8 @@
     
 
     <div class="content" id="content">
+        
+        <i class="material-icons" style="font-size: 24px; color: #007bff; cursor: pointer;" onclick="location.href='/study_plans';">arrow_back</i>
         <h1 class="center-align">Создать новый учебный план</h1>
         <form id="studyPlanForm" enctype="multipart/form-data">
             <label for="title">Название:</label><br>
@@ -24,16 +25,16 @@
             <select id="classid" name="classid" required></select><br>
             
             <div class="file-field input-field">
-                <div class="btn">
-                    <span>Добавить файл</span>
+                {{!-- <div class="btn"> --}}
+                    {{!-- <span>Добавить файл</span> --}}
                     <input type="file" id="file" name="file" required>
-                </div>
+                {{!-- </div> --}}
                 <div class="file-path-wrapper">
                     <input class="file-path validate" type="text" placeholder="Выберите файл">
                 </div>
             </div>
             <button type="submit" id="btnNewStPlan" class="btn">Создать</button>
-            <button type="button" onclick="window.location.href='/study_plans'" class="waves-effect waves-light btn">Вернуться назад</button>
+            
         </form>
     </div>
 

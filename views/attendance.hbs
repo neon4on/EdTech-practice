@@ -1,45 +1,90 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <title>{{title}}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h1 class="center-align">{{title}}</h1>
-        <table class="striped">
-            <thead>
-                <tr>
-                    <th>Имя</th>
-                    <th>Фамилия</th>
-                    <th>Тип</th>
-                    <th>Дата от</th>
-                    <th>Дата до</th>
-                    <th>Комментарий</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each attendance}}
-                <tr>
-                    <td>{{this.firstname}}</td>
-                    <td>{{this.lastname}}</td>
-                    <td>{{this.type}}</td>
-                    <td>{{this.date_from}}</td>
-                    <td>{{this.date_to}}</td>
-                    <td>{{this.comment}}</td>
-                </tr>
-                {{/each}}
-            </tbody>
+  <head>
+    <title>Отсутствия для студента с ID {{id}}</title>
+    <link
+      rel='stylesheet'
+      href='https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css'
+    />
+    <link rel='stylesheet' href='/EdTech-practice/public/css/styles.css' />
+    <!-- Добавлен стиль для адаптации -->
+  </head>
+  <body>
+
+    <div class='content' id='content'>
+
+      <h1>Отсутствия для студента с ID {{id}}</h1>
+
+      <form id='attendance-form'>
+        <label for='date'>Дата:</label><br />
+        <input type='date' id='date' name='date' /><br />
+        <label for='type'>Тип:</label><br />
+        <input type='text' id='type' name='type' /><br />
+        <label for='comment'>Комментарий:</label><br />
+        <input type='text' id='comment' name='comment' /><br />
+        <input type='submit' value='Обновить отсутствие' />
+      </form>
+
+      <ul id='attendance-list'>
+        {{#each attendance}}
+          <li>{{this.date}}: {{this.type}}, Комментарий: {{this.comment}}</li>
+        {{/each}}
+      </ul>
+
+      <button onclick='loadAttendance()'>Обновить список отсутствий</button>
+
+      <div class='container'>
+        <h1 class='center-align'>{{title}}</h1>
+        <table class='striped'>
+          <thead>
+            <tr>
+              <th>Имя</th>
+              <th>Фамилия</th>
+              <th>Тип</th>
+              <th>Дата от</th>
+              <th>Дата до</th>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each attendance}}
+              <tr>
+                <td>{{this.firstname}}</td>
+                <td>{{this.lastname}}</td>
+                <td>{{this.type}}</td>
+                <td>{{this.date_from}}</td>
+                <td>{{this.date_to}}</td>
+                <td>{{this.comment}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
         </table>
-        <button id="back-to-classes" class="btn waves-effect waves-light">Назад к классам</button>
+        <button id='back-to-classes' class='btn waves-effect waves-light'>Назад к классам</button>
+      </div>
     </div>
 
-    <script>
-        document.getElementById('back-to-classes').addEventListener('click', function() {
-            window.location.href = '/';
-        });
-    </script>
-</body>
+  </body>
 </html>
+
+<script>
+  function loadAttendance() { fetch('/attendance?user_id={{id}}') .then(response => response.json())
+  .then(absences => { const list = document.getElementById('attendance-list'); list.innerHTML = '';
+  for (let absence of absences) { const li = document.createElement('li'); li.textContent =
+  `${absence.date}: ${absence.type}, Комментарий: ${absence.comment}`; list.appendChild(li); } }); }
+  document.getElementById('attendance-form').addEventListener('submit', function(event) {
+  event.preventDefault(); const date = document.getElementById('date').value; const type =
+  document.getElementById('type').value; const comment = document.getElementById('comment').value;
+  fetch('/attendance', { method: 'PUT', headers: { 'Content-Type': 'application/json', }, body:
+  JSON.stringify({ id:
+  {{id}}, date, type, comment }), }) .then(response => response.json()) .then(data => {
+  console.log(data); loadAttendance(); }) .catch((error) => { console.error('Error:', error); });
+  }); window.onload = loadAttendance; // Функции для управления боковым меню function
+  toggleSidebar() { const sidebar = document.querySelector('.sidebar'); const header =
+  document.getElementById('header'); const content = document.getElementById('content');
+  sidebar.classList.toggle('visible'); header.classList.toggle('sidebar-open');
+  content.classList.toggle('sidebar-open'); } function closeSidebar() { const sidebar =
+  document.querySelector('.sidebar'); const header = document.getElementById('header'); const
+  content = document.getElementById('content'); sidebar.classList.remove('visible');
+  header.classList.remove('sidebar-open'); content.classList.remove('sidebar-open'); } // Обновление
+  стилей при загрузке страницы document.addEventListener('DOMContentLoaded', function() { if
+  (window.innerWidth <= 600) { document.getElementById('content').classList.add('mobile-view'); }
+</script>

@@ -3,26 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>{{groupName}}</title>
-
-</head>
-<body>
-  <div class="content" id="content">
-    <h1>Группа: {{groupName}}</h1>
-    <link rel="stylesheet" href="path/to/your/styles.css">
+    <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
+  
+<div class="content" id="content">
+  <div class="container">
+<i class="material-icons" style="font-size: 24px; color: #007bff; cursor: pointer;" onclick="location.href='/groups';">arrow_back</i>
+    <h1>Группа: {{groupName}}</h1>
+    
+    {{!-- <span><a href="/groups/{{group.id}}/edit">Редактировать</a></span>
+    <span>
+        <form class="delete-group-form" action="/groups/{{group.id}}/delete" method="POST">
+            <button class="delete-group-button" type="submit">Удалить</button>
+        </form>
+    </span> --}}
+
+
+    
  <h1>Группа: {{groupName}}</h1>
    <span><a href="/groups">Вернуться к списку групп</a></span>
    <span><a href="/groups/{{group.id}}/edit">Редактировать</a></span>
+   <span><a href="/groups/add_student/{{group.id}}">Добавить студента</a></span>
    <span>
     <form class="delete-group-form" action="/groups/{{group.id}}/delete" method="POST">
       <button class="delete-group-button" type="submit">Удалить</button>
     </form>
    </span>
-
     <h2>Список студентов:</h2>
     <div class="container">
         {{#if students.length}}
@@ -36,51 +46,55 @@
         {{/if}}
     </div>
 
-    <a href="/groups">Вернуться к списку групп</a>
-  </div>
-    <script>
-  $(document).ready(function() {
+    
+</div>
+
+<script>
+$(document).ready(function() {
     $(".delete-group-form").submit(function(e) {
-      e.preventDefault();
-      const form = $(this);
-      $.post(form.attr('action')).done(function(response) {
-        if (response.message === 'Группа успешно удалена!') {
-          M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
-          setTimeout(function() {
-            window.location.href = '/groups';
-          }, 2000);
-        } else {
-          M.toast({html: response.message, classes: 'rounded red'});
-        }
-      }).fail(function(xhr) {
-        if (xhr.responseJSON && xhr.responseJSON.message) {
-          M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
-        } else {
-          M.toast({html: 'При удалении группы возникла ошибка!', classes: 'rounded red'});
-        }
-      });
-    });
-  });
-
-   function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const header = document.getElementById('header');
-            const content = document.getElementById('content');
-            sidebar.classList.toggle('visible');
-            header.classList.toggle('sidebar-open');
-            content.classList.toggle('sidebar-open');
-        }
-
-            function closeSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const header = document.getElementById('header');
-            const content = document.getElementById('content');
-            sidebar.classList.remove('visible');
-            header.classList.remove('sidebar-open');
-            content.classList.remove('sidebar-open');
+        e.preventDefault();
+        const form = $(this);
+        $.post(form.attr('action')).done(function(response) {
+            if (response.message === 'Группа успешно удалена!') {
+                M.toast({html: response.message, classes: '#26a69a teal lighten-1 rounded'});
+                setTimeout(function() {
+                    window.location.href = '/groups';
+                }, 2000);
+            } else {
+                M.toast({html: response.message, classes: 'rounded red'});
             }
-</script>
+        }).fail(function(xhr) {
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                M.toast({html: xhr.responseJSON.message, classes: 'rounded red'});
+            } else {
+                M.toast({html: 'При удалении группы возникла ошибка!', classes: 'rounded red'});
+            }
+        });
+    });
+});
 
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.getElementById('header');
+    const content = document.getElementById('content');
+    if (sidebar && header && content) {
+        sidebar.classList.toggle('visible');
+        header.classList.toggle('sidebar-open');
+        content.classList.toggle('sidebar-open');
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.getElementById('header');
+    const content = document.getElementById('content');
+    if (sidebar && header && content) {
+        sidebar.classList.remove('visible');
+        header.classList.remove('sidebar-open');
+        content.classList.remove('sidebar-open');
+    }
+}
+</script>
 
 </body>
 </html>

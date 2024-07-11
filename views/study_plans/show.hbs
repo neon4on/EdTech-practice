@@ -1,192 +1,76 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
+    <meta charset="UTF-8">
     <title>{{studyPlan.title}}</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        transition: margin-left 0.3s ease;
-      }
-      .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px;
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-        transition: margin-left 0.3s ease;
-      }
-      .header-left {
-        display: flex;
-        align-items: center;
-      }
-      .header-left img {
-        width: 40px;
-        height: 40px;
-        margin-right: 10px;
-      }
-      .header-right {
-        display: flex;
-        align-items: center;
-      }
-      .header-right span {
-        margin-right: 20px;
-      }
-      .header-right button {
-        padding: 5px 10px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      .header-right button:hover {
-        background-color: #0056b3;
-      }
-      .toggle-sidebar-button {
-        margin-right: 20px;
-      }
-      .header.sidebar-open {
-        margin-left: 250px; /* Ширина сайдбара */
-      }
-      .content {
-        margin-left: 0;
-        transition: margin-left 0.3s ease;
-        padding: 20px;
-      }
-      .content.sidebar-open {
-        margin-left: 250px; /* Ширина сайдбара */
-      }
-      .excelData {
-        margin-top: 20px;
-        border-collapse: collapse;
-        width: 100%;
-      }
-      .excelData th, .excelData td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: center;
-      }
-      .subject-name {
-        text-align: left;
-      }
-      .sidebar {
-        width: 250px;
-        background-color: #343a40;
-        color: #fff;
-        position: fixed;
-        left: -250px;
-        top: 0;
-        height: 100%;
-        transition: left 0.3s ease;
-        display: flex;
-        flex-direction: column;
-      }
-      .sidebar.visible {
-        left: 0;
-      }
-      .sidebar-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px;
-        background-color: #23272b;
-        border-bottom: 1px solid #444;
-      }
-      .sidebar-header img {
-        width: 30px;
-        height: 30px;
-        margin-right: 10px;
-      }
-      .close-sidebar-button {
-        background: none;
-        border: none;
-        color: #fff;
-        font-size: 20px;
-        cursor: pointer;
-      }
-      .menu {
-        padding: 20px;
-      }
-      .menu ul {
-        list-style: none;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-      }
-      .menu ul li {
-        margin-bottom: 10px;
-      }
-      .menu ul li a {
-        color: #fff;
-        text-decoration: none;
-      }
-    </style>
-  </head>
-  <body>
-   
-    <div class="content" id="content">
-      <h1>{{studyPlan.title}}</h1>
-      <p>Описание: {{studyPlan.description}}</p>
-      <p>ID группы: {{studyPlan.classid}}</p>
-      <button onclick="location.href='/study_plans';">Вернуться к списку учебных планов</button>
-      <div class='excelData'>
+    <link rel="stylesheet" href="/EdTech-practice/public/css/styles.css">
+</head>
+<body>
+
+
+<div class="content" id="content">
+  <i class="material-icons" style="font-size: 24px; color: #007bff; cursor: pointer;" onclick="location.href='/study_plans';">arrow_back</i>
+    <h1>{{studyPlan.title}}</h1>
+    <p>Описание: {{studyPlan.description}}</p>
+    <p>ID группы: {{studyPlan.classid}}</p>
+    
+    <div class='excelData'>
         <h2>Данные из Excel:</h2>
         <table class='excelData'>
-          <thead>
-            <tr>
-              <th rowspan='2'>Название предмета</th>
-              <th colspan='{{classesLength}}'>Количество часов в неделю для:</th>
-            </tr>
-            <tr>
-              {{#each classes}}
-                <th>{{this}}</th>
-              {{/each}}
-            </tr>
-          </thead>
-          <tbody>
-            {{#each formattedData}}
-              <tr>
-                <td class='subject-name'>{{this.subject}}</td>
-                {{#each this.hours}}
-                  <td>{{this}}</td>
+            <thead>
+                <tr>
+                    <th rowspan='2'>Название предмета</th>
+                    <th colspan='{{classesLength}}'>Количество часов в неделю для:</th>
+                </tr>
+                <tr>
+                    {{#each classes}}
+                        <th>{{this}}</th>
+                    {{/each}}
+                </tr>
+            </thead>
+            <tbody>
+                {{#each formattedData}}
+                    <tr>
+                        <td class='subject-name'>{{this.subject}}</td>
+                        {{#each this.hours}}
+                            <td>{{this}}</td>
+                        {{/each}}
+                    </tr>
                 {{/each}}
-              </tr>
-            {{/each}}
-          </tbody>
+            </tbody>
         </table>
-      </div>
     </div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-      function toggleSidebar() {
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const header = document.getElementById('header');
         const content = document.getElementById('content');
         sidebar.classList.toggle('visible');
         header.classList.toggle('sidebar-open');
         content.classList.toggle('sidebar-open');
-      }
+    }
 
-      function closeSidebar() {
+    function closeSidebar() {
         const sidebar = document.querySelector('.sidebar');
         const header = document.getElementById('header');
         const content = document.getElementById('content');
         sidebar.classList.remove('visible');
         header.classList.remove('sidebar-open');
         content.classList.remove('sidebar-open');
-      }
+    }
 
-      function logout() {
+    function logout() {
         $.post('/auth/logout').done(function(response) {
-          alert(response.message);
-          window.location.href = '/auth/login';
+            alert(response.message);
+            window.location.href = '/auth/login';
         }).fail(function(xhr) {
-          alert('Ошибка при выходе: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'неизвестная ошибка'));
+            alert('Ошибка при выходе: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'неизвестная ошибка'));
         });
-      }
-    </script>
-  </body>
+    }
+</script>
+
+</body>
 </html>

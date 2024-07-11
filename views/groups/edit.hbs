@@ -1,10 +1,12 @@
 <div class="content" id="content">
+  
+<i class="material-icons" style="font-size: 24px; color: #007bff; cursor: pointer;" onclick="location.href='/groups';">arrow_back</i>
 <h1>Редактировать учебную группу</h1>
-<a href="/groups">Вернуться к списку групп</a>
+<a href="/groups/{{group.id}}">Вернуться к странице группы</a>
 <form id='edit-group-form' action='/groups/{{group.id}}' method='POST'>
   <label for='name'>Название:</label>
   <input type='text' id='name' name='name' value='{{group.name}}' required />
-  <button type='submit'>Изменить</button>
+  <button type='submit'class="waves-effect waves-light btn">Изменить</button>
 </form>
 </div>
 

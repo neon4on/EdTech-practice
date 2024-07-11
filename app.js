@@ -20,9 +20,9 @@ const hbs = exphbs.create({
   helpers: {
     eq: function (v1, v2) {
       return v1 === v2;
-    }
-  }
-}); 
+    },
+  },
+});
 
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
@@ -73,45 +73,65 @@ app.get('/index', (req, res) => {
 });
 
 // Защищаем маршруты от неавторизованных пользователей
-app.use('/groups', (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/auth/login');
-  }
-  next();
-}, groupRoutes);
+app.use(
+  '/groups',
+  (req, res, next) => {
+    if (!req.session.user) {
+      return res.redirect('/auth/login');
+    }
+    next();
+  },
+  groupRoutes,
+);
 
-app.use('/study_plans', (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/auth/login');
-  }
-  next();
-}, studyplanRoutes);
+app.use(
+  '/study_plans',
+  (req, res, next) => {
+    if (!req.session.user) {
+      return res.redirect('/auth/login');
+    }
+    next();
+  },
+  studyplanRoutes,
+);
 
-app.use('/class_book', (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/auth/login');
-  }
-  next();
-}, classBookRoutes);
+app.use(
+  '/class_book',
+  (req, res, next) => {
+    if (!req.session.user) {
+      return res.redirect('/auth/login');
+    }
+    next();
+  },
+  classBookRoutes,
+);
 
-app.use('/homework', (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/auth/login');
-  }
-  next();
-}, homeworkList);
+app.use(
+  '/homework',
+  (req, res, next) => {
+    if (!req.session.user) {
+      return res.redirect('/auth/login');
+    }
+    next();
+  },
+  homeworkList,
+);
 
 app.use('/auth', authRouter);
 
-app.use('/classes', (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/auth/login');
-  }
-  next();
-}, attendanceRoutes);
+app.use(
+  '/classes',
+  (req, res, next) => {
+    if (!req.session.user) {
+      return res.redirect('/auth/login');
+    }
+    next();
+  },
+  attendanceRoutes,
+);
 
 // Остальные маршруты...
-app.use('/index', indexRoutes); 
+app.use('/index', indexRoutes);
 
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {
