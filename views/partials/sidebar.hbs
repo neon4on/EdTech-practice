@@ -26,10 +26,13 @@
           <li><a href='/study_plans'>Учебные планы</a></li>
           <li><a href='/class_book'>Журнал</a></li>
           <li><a href='/grade'>Оценки</a></li>
-          <li><a href='/homework'>Домашнее задание</a></li>
         {{else if (eq user.role 'student')}}
           <li><a href='/schedule'>Расписание</a></li>
           <li><a href='/grade'>Оценки</a></li>
+          {{else if (eq user.role 'nastavnik')}}
+          <li><a href='/classes'>Посещаемость</a></li>
+          {{else if (eq user.role 'tutor')}}
+          <li><a href='/homework'>Домашнее задание</a></li>
         {{/if}}
       {{/if}}
 
